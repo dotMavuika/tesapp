@@ -1,5 +1,10 @@
 // global_vars.dart
 import 'dart:collection';
+// Importar logger
+import 'package:logger/logger.dart';
+
+//Agregar log usando logger para ver qué datos se están importando
+var logger = Logger(printer: PrettyPrinter());
 
 /// Singleton class para almacenar variables globales en la aplicación
 /// Permite guardar valores dinámicos con acceso global
@@ -9,11 +14,16 @@ class GlobalVars {
 
   // Constructor factory que devuelve la instancia
   factory GlobalVars() {
+    Logger().i(
+      'Obteniendo instancia GlobalVars. HashCode: ${_instance.hashCode}',
+    );
     return _instance;
   }
 
   // Constructor privado
-  GlobalVars._internal();
+  GlobalVars._internal() {
+    Logger().i('Nueva instancia GlobalVars creada. HashCode: $hashCode');
+  }
 
   // Mapa para almacenar los valores
   final Map<String, dynamic> _values = HashMap<String, dynamic>();
