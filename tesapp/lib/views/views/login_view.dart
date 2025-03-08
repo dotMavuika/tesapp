@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:tesapp/models/profile_data_student.dart';
 import 'dart:convert';
-import 'main_menu.dart'; // Importa MainMenuScreen
+import 'main_menu.dart';
 import 'package:logger/logger.dart';
-import '../../models/profile_data_student.dart'; // Asegúrate de importar el modelo
 
-var logger = Logger(printer: PrettyPrinter());
+var logger = Logger(
+  printer: PrettyPrinter(),
+);
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -21,107 +21,79 @@ class LoginViewState extends State<LoginView> {
   bool _isLoading = false;
 
   Future<void> _login() async {
+   
+
     setState(() {
       _isLoading = true;
     });
 
     final url = Uri.parse('https://tesa.academicok.com/apimobile/login');
-
+    
     try {
       final body = {
         'user': userController.text,
         'pass': passController.text,
-        'action': 'login',
+        'action': 'login'
       };
 
-      // Log de la petición
-      logger.i('Enviando petición de login con datos: $body');
+      // Usar logger para registrar la petición
+      logger.i(body);
 
       final response = await http.post(
         url,
         body: body,
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
       );
-
-      // if (!mounted) return;
+      
+     // if (!mounted) return;
 
       setState(() {
         _isLoading = false;
       });
 
-      // Log de la respuesta completa
-      logger.i('Respuesta del servidor - Status Code: ${response.statusCode}');
-      logger.i('Respuesta del servidor - Body: ${response.body}');
+      // Usar logger para registrar la respuesta
+      logger.i(response.body);
 
-      try {
-        // Intentar decodificar el JSON
-        final data = json.decode(response.body);
-        logger.i('JSON decodificado correctamente:');
-        logger.i(data);
+      final data = json.decode(response.body);
 
-        // Verificar campos clave que debería tener el JSON para ProfileDataStudent
-        logger.i('Verificando campos esenciales:');
-        logger.i('result existe: ${data.containsKey("result")}');
-        logger.i('auth existe: ${data.containsKey("auth")}');
-        logger.i(
-          'perfilactivoid existe: ${data.containsKey("perfilactivoid")}',
-        );
-        logger.i('persona existe: ${data.containsKey("persona")}');
-        logger.i('perfiles existe: ${data.containsKey("perfiles")}');
-
-        // Intentar crear un objeto ProfileDataStudent
-        if (data["result"] == "ok") {
-          try {
-            logger.i('Intentando crear objeto ProfileDataStudent...');
-            final userData = ProfileDataStudent.fromJson(data);
-            logger.i('ProfileDataStudent creado exitosamente:');
-            logger.i('Nombre: ${userData.persona}');
-            logger.i('Email: ${userData.email}');
-            logger.i('Perfiles: ${userData.perfiles.length}');
-
-            // Si llegamos aquí, el objeto se creó correctamente
-            logger.i('Login exitoso con datos correctamente mapeados');
-
-            // Navegación a la pantalla principal
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => MainMenuScreen()),
-            );
-          } catch (e) {
-            logger.e('Error al crear ProfileDataStudent: $e');
-            _showSnackBar('Error al procesar datos de usuario: $e');
-          }
-        } else {
-          logger.w('Login fallido: ${data['message'] ?? 'Error desconocido'}');
-          _showSnackBar(
-            'Login fallido: ${data['message'] ?? 'Error desconocido'}',
+  logger.i(data);
+  logger.i(response.statusCode);
+      if (response.statusCode == 200) {
+        
+        if (data["result"]== "ok") {
+          // Log in exitoso
+          logger.i('Login exitoso');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MainMenu()),
           );
+        } else {
+          _showSnackBar('Login fallido: ${data['message'] ?? 'Error desconocido'}');
         }
-      } catch (e) {
-        logger.e('Error al decodificar JSON: $e');
-        _showSnackBar('Error al procesar respuesta: $e');
+      } else {
+        _showSnackBar('Error de conexión: ${response.statusCode}');
       }
     } catch (e) {
-      // if (!mounted) return;
+     // if (!mounted) return;
 
       setState(() {
         _isLoading = false;
       });
 
-      logger.e('Error en la petición: $e');
       _showSnackBar('Error: $e');
     }
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // El resto del código permanece igual...
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -163,23 +135,20 @@ class LoginViewState extends State<LoginView> {
               obscureText: true,
             ),
             const SizedBox(height: 24.0),
-            _isLoading
-                ? CircularProgressIndicator(color: Colors.purple)
-                : ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
-                  onPressed: _login,
-                  child: const Text('Login'),
+            _isLoading 
+            ? CircularProgressIndicator(color: Colors.purple)
+            : ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
+              ),
+              onPressed: _login,
+              child: const Text('Login'),
+            ),
             const SizedBox(height: 12.0),
             TextButton(
               onPressed: () {},
