@@ -1,0 +1,2 @@
+C:/Users/SISTEMAS 2/Documents/AppTESA/tesapp/android/app/.cxx/Debug/182v195x/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/SISTEMAS 2/Documents/AppTESA/tesapp/android/app/.cxx/Debug/182v195x/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rive/rive.dart';
 import 'package:rive_animation/screens/entryPoint/entry_point.dart';
+// Importar el controlador
+import 'package:rive_animation/controllers/login_controller.dart';
 
 class SignInForm extends StatefulWidget {
   const SignInForm({
@@ -20,8 +22,21 @@ class _SignInFormState extends State<SignInForm> {
   late SMITrigger error;
   late SMITrigger success;
   late SMITrigger reset;
-
   late SMITrigger confetti;
+  
+  // Controladores para los campos de texto
+  final TextEditingController _userController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  
+  // Instancia del controlador de login
+  final LoginController _loginController = LoginController();
+
+  @override
+  void dispose() {
+    _userController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   void _onCheckRiveInit(Artboard artboard) {
     StateMachineController? controller =
@@ -39,53 +54,108 @@ class _SignInFormState extends State<SignInForm> {
     artboard.addController(controller!);
 
     confetti = controller.findInput<bool>("Trigger explosion") as SMITrigger;
+    
+    // Si isShowConfetti es true, disparar la animación de confeti inmediatamente
+    if (isShowConfetti) {
+      confetti.fire();
+    }
   }
 
-  void singIn(BuildContext context) {
-    // confetti.fire();
+  Future<void> signIn(BuildContext context) async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    
+    // Mostrar la animación de carga
     setState(() {
-      isShowConfetti = true;
       isShowLoading = true;
     });
-    Future.delayed(
-      const Duration(seconds: 1),
-      () {
-        if (_formKey.currentState!.validate()) {
-          success.fire();
-          Future.delayed(
-            const Duration(seconds: 2),
-            () {
-              setState(() {
-                isShowLoading = false;
-              });
-              confetti.fire();
-              // Navigate & hide confetti
-              Future.delayed(const Duration(seconds: 1), () {
-                // Navigator.pop(context);
-                if (!context.mounted) return;
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const EntryPoint(),
-                  ),
-                );
-              });
-            },
-          );
-        } else {
-          error.fire();
-          Future.delayed(
-            const Duration(seconds: 2),
-            () {
-              setState(() {
-                isShowLoading = false;
-              });
-              reset.fire();
-            },
-          );
+    
+    // Obtener los valores de los campos
+    final user = _userController.text;
+    final password = _passwordController.text;
+    
+    try {
+      // Enviar datos al controlador para validación
+      final result = await _loginController.login(user, password);
+      
+      if (result['success']) {
+        // Éxito en la autenticación
+        success.fire();
+        
+        // Esperar a que termine la animación de éxito
+        await Future.delayed(const Duration(seconds: 2));
+        
+        // Primero ocultar la animación de carga
+        setState(() {
+          isShowLoading = false;
+        });
+        
+        // Luego mostrar y disparar el confeti
+        setState(() {
+          isShowConfetti = true;
+        });
+        
+        // Dar tiempo para que el widget de confeti se inicialice
+        await Future.delayed(const Duration(milliseconds: 200));
+        
+        if (mounted) {
+          confetti.fire();
         }
-      },
-    );
+        
+        // Esperar y navegar
+        await Future.delayed(const Duration(seconds: 1));
+        
+        if (!context.mounted) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const EntryPoint(),
+          ),
+        );
+      } else {
+        // Error en la autenticación
+        error.fire();
+        
+        // Esperar a que termine la animación de error
+        await Future.delayed(const Duration(seconds: 2));
+        
+        // Ocultar la animación de carga y mostrar mensaje de error
+        setState(() {
+          isShowLoading = false;
+        });
+        
+        reset.fire();
+        
+        // Mostrar mensaje de error
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? 'Error de autenticación'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      // Error en la conexión o procesamiento
+      error.fire();
+      
+      await Future.delayed(const Duration(seconds: 2));
+      
+      setState(() {
+        isShowLoading = false;
+      });
+      
+      reset.fire();
+      
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -98,7 +168,7 @@ class _SignInFormState extends State<SignInForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                "Email",
+                "Usuario",
                 style: TextStyle(
                   color: Colors.black54,
                 ),
@@ -106,13 +176,14 @@ class _SignInFormState extends State<SignInForm> {
               Padding(
                 padding: const EdgeInsets.only(top: 8, bottom: 16),
                 child: TextFormField(
+                  controller: _userController,
                   validator: (value) {
-                    if (value!.isEmpty) {
-                      return "";
+                    if (value == null || value.isEmpty) {
+                      return "Por favor ingresa tu nombre de usuario";
                     }
                     return null;
                   },
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: TextInputType.text,
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
                     prefixIcon: Padding(
@@ -131,10 +202,11 @@ class _SignInFormState extends State<SignInForm> {
               Padding(
                 padding: const EdgeInsets.only(top: 8, bottom: 16),
                 child: TextFormField(
+                  controller: _passwordController,
                   obscureText: true,
                   validator: (value) {
-                    if (value!.isEmpty) {
-                      return "";
+                    if (value == null || value.isEmpty) {
+                      return "Por favor ingresa tu contraseña";
                     }
                     return null;
                   },
@@ -150,7 +222,7 @@ class _SignInFormState extends State<SignInForm> {
                 padding: const EdgeInsets.only(top: 8, bottom: 24),
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    singIn(context);
+                    signIn(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFF77D8E),

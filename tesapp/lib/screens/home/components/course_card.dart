@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import '../../../controllers/dashboard_controller.dart';
 
 class CourseCard extends StatelessWidget {
-  const CourseCard({
-    super.key,
-    required this.title,
-    this.color = const Color(0xFF7553F6),
-    this.iconSrc = "assets/icons/ios.svg",
-  });
+  const CourseCard({super.key, required this.newsItem});
 
-  final String title, iconSrc;
-  final Color color;
+  final NewsItem newsItem;
 
   @override
   Widget build(BuildContext context) {
@@ -19,57 +13,28 @@ class CourseCard extends StatelessWidget {
       height: 280,
       width: 260,
       decoration: BoxDecoration(
-        color: color,
+        color: Colors.blueAccent,
         borderRadius: const BorderRadius.all(Radius.circular(30)),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            newsItem.title,
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                color: Colors.white, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 6, right: 8),
-              child: Column(
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                        color: Colors.white, fontWeight: FontWeight.w600),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 12, bottom: 8),
-                    child: Text(
-                      "Build and animate an iOS app from scratch",
-                      style: TextStyle(
-                        color: Colors.white38,
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    "61 SECTIONS - 11 HOURS",
-                    style: TextStyle(
-                      color: Colors.white38,
-                    ),
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: List.generate(
-                      3,
-                      (index) => Transform.translate(
-                        offset: Offset((-10 * index).toDouble(), 0),
-                        child: CircleAvatar(
-                          radius: 20,
-                          backgroundImage: AssetImage(
-                            "assets/avaters/Avatar ${index + 1}.jpg",
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.network(
+                newsItem.image,
+                fit: BoxFit.cover,
+                width: double.infinity,
               ),
             ),
           ),
-          SvgPicture.asset(iconSrc),
         ],
       ),
     );
