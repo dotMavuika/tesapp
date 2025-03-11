@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rive_animation/controllers/dashboard_controller.dart';
 import '../../model/course.dart';
 import 'components/course_card.dart';
 import 'components/secondary_course_card.dart';
