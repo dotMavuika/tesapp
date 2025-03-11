@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../model/menu.dart';
-import '../../../utils/rive_utils.dart';
 import '../../../controllers/profile_controller.dart';
 import '../../../model/profile_data.dart'; // Importar para acceder a los tipos
 import 'info_card.dart';
-import 'side_menu.dart';
 import '../../../model/global_vars.dart';
 
 class SideBar extends StatefulWidget {

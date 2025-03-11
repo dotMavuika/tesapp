@@ -26,7 +26,9 @@ MERGED from C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\android\app\src\main\An
 INJECTED from C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\android\app\src\debug\AndroidManifest.xml:1:1-7:12
 INJECTED from C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\android\app\src\debug\AndroidManifest.xml:1:1-7:12
 INJECTED from C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\android\app\src\debug\AndroidManifest.xml:1:1-7:12
+MERGED from [:path_provider_android] C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\path_provider_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-7:12
 MERGED from [:rive_common] C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\rive_common\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-7:12
+MERGED from [:sqflite_android] C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\sqflite_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.fragment:fragment:1.7.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\3fb85da19fc9ad7a0ea56b642feee103\transformed\fragment-1.7.1\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.window:window:1.2.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\7066062a0dcd50f9b815f9f7ad4eb2a4\transformed\jetified-window-1.2.0\AndroidManifest.xml:17:1-31:12
 MERGED from [androidx.window:window-java:1.2.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\dd00073af0957401347e3d2686b43488\transformed\jetified-window-java-1.2.0\AndroidManifest.xml:17:1-21:12
@@ -44,7 +46,6 @@ MERGED from [androidx.core:core:1.13.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\
 MERGED from [androidx.lifecycle:lifecycle-runtime:2.7.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\4cae3cfcc41a4d12aa716941d5cd7c26\transformed\lifecycle-runtime-2.7.0\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\91d47babf21dbd0917a49e6a8cb945b8\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:17:1-35:12
 MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\ad375f03f1d53886db97b314bf113180\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.annotation:annotation-experimental:1.4.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\708a6ab1ca5cfd63732918ee125ed714\transformed\jetified-annotation-experimental-1.4.0\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\9f43be77bfc323ccf41db52e8d68c305\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:17:1-55:12
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\aa3099410f6c88b1af9ad83f4b5aed5b\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:17:1-33:12
 MERGED from [androidx.tracing:tracing:1.2.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\0f87838d1d3f97ec85aa18e36a97653a\transformed\jetified-tracing-1.2.0\AndroidManifest.xml:17:1-22:12
@@ -52,6 +53,7 @@ MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\SISTEMAS 2\.gradle\
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\31cabfcf2cbc1abb420a03f9bbf6c79f\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:17:1-27:12
 MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\3cf21864186d254d283cbee54a4a02e6\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.window.extensions.core:core:1.0.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\1d0c1a3f77e5e6167b1d220f363efc25\transformed\jetified-core-1.0.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\708a6ab1ca5cfd63732918ee125ed714\transformed\jetified-annotation-experimental-1.4.0\AndroidManifest.xml:2:1-7:12
 MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\2b5477fb578652ad62cb7a4cde36c6c6\transformed\jetified-relinker-1.4.5\AndroidManifest.xml:2:1-7:12
 	package
 		INJECTED from C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\android\app\src\debug\AndroidManifest.xml
@@ -69,8 +71,12 @@ uses-sdk
 INJECTED from C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\android\app\src\debug\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\android\app\src\debug\AndroidManifest.xml
 INJECTED from C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\android\app\src\debug\AndroidManifest.xml
+MERGED from [:path_provider_android] C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\path_provider_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:5:5-44
+MERGED from [:path_provider_android] C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\path_provider_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:5:5-44
 MERGED from [:rive_common] C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\rive_common\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:5:5-44
 MERGED from [:rive_common] C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\rive_common\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:5:5-44
+MERGED from [:sqflite_android] C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\sqflite_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:5:5-44
+MERGED from [:sqflite_android] C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\sqflite_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:5:5-44
 MERGED from [androidx.fragment:fragment:1.7.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\3fb85da19fc9ad7a0ea56b642feee103\transformed\fragment-1.7.1\AndroidManifest.xml:5:5-44
 MERGED from [androidx.fragment:fragment:1.7.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\3fb85da19fc9ad7a0ea56b642feee103\transformed\fragment-1.7.1\AndroidManifest.xml:5:5-44
 MERGED from [androidx.window:window:1.2.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\7066062a0dcd50f9b815f9f7ad4eb2a4\transformed\jetified-window-1.2.0\AndroidManifest.xml:20:5-44
@@ -105,8 +111,6 @@ MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\SISTEMAS 2\.gr
 MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\91d47babf21dbd0917a49e6a8cb945b8\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:21:5-44
 MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\ad375f03f1d53886db97b314bf113180\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:20:5-44
 MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\ad375f03f1d53886db97b314bf113180\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:20:5-44
-MERGED from [androidx.annotation:annotation-experimental:1.4.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\708a6ab1ca5cfd63732918ee125ed714\transformed\jetified-annotation-experimental-1.4.0\AndroidManifest.xml:5:5-44
-MERGED from [androidx.annotation:annotation-experimental:1.4.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\708a6ab1ca5cfd63732918ee125ed714\transformed\jetified-annotation-experimental-1.4.0\AndroidManifest.xml:5:5-44
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\9f43be77bfc323ccf41db52e8d68c305\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:21:5-44
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\9f43be77bfc323ccf41db52e8d68c305\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:21:5-44
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\aa3099410f6c88b1af9ad83f4b5aed5b\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
@@ -121,6 +125,8 @@ MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\SISTEMAS 2\.grad
 MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\3cf21864186d254d283cbee54a4a02e6\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.window.extensions.core:core:1.0.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\1d0c1a3f77e5e6167b1d220f363efc25\transformed\jetified-core-1.0.0\AndroidManifest.xml:5:5-44
 MERGED from [androidx.window.extensions.core:core:1.0.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\1d0c1a3f77e5e6167b1d220f363efc25\transformed\jetified-core-1.0.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\708a6ab1ca5cfd63732918ee125ed714\transformed\jetified-annotation-experimental-1.4.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\708a6ab1ca5cfd63732918ee125ed714\transformed\jetified-annotation-experimental-1.4.0\AndroidManifest.xml:5:5-44
 MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\2b5477fb578652ad62cb7a4cde36c6c6\transformed\jetified-relinker-1.4.5\AndroidManifest.xml:5:5-43
 MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] C:\Users\SISTEMAS 2\.gradle\caches\8.10\transforms\2b5477fb578652ad62cb7a4cde36c6c6\transformed\jetified-relinker-1.4.5\AndroidManifest.xml:5:5-43
 	android:targetSdkVersion

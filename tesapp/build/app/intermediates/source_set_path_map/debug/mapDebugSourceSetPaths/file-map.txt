@@ -25,4 +25,6 @@ com.example.flutter_upgrde_app-resValues-23 C:\Users\SISTEMAS 2\Documents\AppTES
 com.example.flutter_upgrde_app-packageDebugResources-24 C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\app\intermediates\incremental\debug\packageDebugResources\merged.dir
 com.example.flutter_upgrde_app-packageDebugResources-25 C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\app\intermediates\incremental\debug\packageDebugResources\stripped.dir
 com.example.flutter_upgrde_app-debug-26 C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\app\intermediates\merged_res\debug\mergeDebugResources
-com.example.flutter_upgrde_app-debug-27 C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\rive_common\intermediates\packaged_res\debug\packageDebugResources
+com.example.flutter_upgrde_app-debug-27 C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\path_provider_android\intermediates\packaged_res\debug\packageDebugResources
+com.example.flutter_upgrde_app-debug-28 C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\rive_common\intermediates\packaged_res\debug\packageDebugResources
+com.example.flutter_upgrde_app-debug-29 C:\Users\SISTEMAS 2\Documents\AppTESA\tesapp\build\sqflite_android\intermediates\packaged_res\debug\packageDebugResources
