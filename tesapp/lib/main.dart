@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'controllers/dashboard_controller.dart';
 import 'package:rive_animation/screens/onboding/onboding_screen.dart';
+import 'screens/profile/general_profile.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,7 +37,13 @@ class MyApp extends StatelessWidget {
             errorBorder: defaultInputBorder,
           ),
         ),
-        home: const OnbodingScreen(),
+        // Add routes configuration
+        routes: {
+          '/': (context) => const OnbodingScreen(),
+          '/profile': (context) => const GeneralProfile(),
+        },
+        // Change to initialRoute instead of home
+        initialRoute: '/',
       ),
     );
   }

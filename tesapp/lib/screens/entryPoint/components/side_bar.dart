@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../model/menu.dart';
 import '../../../controllers/profile_controller.dart';
-import '../../../model/profile_data.dart'; // Importar para acceder a los tipos
-import 'info_card.dart';
-import '../../../model/global_vars.dart';
+import '../../../utils/rive_utils.dart';
+ // Update this path to match your project structure
 
 class SideBar extends StatefulWidget {
   const SideBar({super.key});
@@ -22,46 +21,11 @@ class _SideBarState extends State<SideBar> {
     profileController = ProfileController();
   }
   
-  // Función local para formatear nombre
-  String formatFullName(String fullName) {
-    if (fullName.isEmpty) return "Usuario";
-    
-    final titleCaseName = fullName.split(' ').map((word) {
-      if (word.isEmpty) return word;
-      return word[0].toUpperCase() +
-          (word.length > 1 ? word.substring(1).toLowerCase() : '');
-    }).join(' ');
-    
-    final nameParts = titleCaseName.split(' ');
-    if (nameParts.length >= 2) {
-      return '${nameParts[0]} ${nameParts[1]}';
-    }
-    
-    return titleCaseName;
-  }
+  // Existing formatFullName method...
   
   @override
   Widget build(BuildContext context) {
-    // Obtén el objeto completo de tipo ProfileDataStudent desde GlobalVars
-    final profileDataStudent =
-        GlobalVars().get('profileData') as ProfileDataStudent?;
-    
-    // Usa la propiedad 'persona' de ProfileDataStudent
-    final formattedName = profileDataStudent != null 
-        ? formatFullName(profileDataStudent.persona) 
-        : "Usuario";
-    
-    // Para el campo carrera, se verifica primero en el objeto activo (Perfile)
-    // obteniendo el perfil activo y, a partir de él, el campo carrera o carrerarep
-    final activeProfile = profileController.getActiveProfile();
-    String carreraText = "Estudiante";
-    if (activeProfile != null) {
-      if (activeProfile.carrerarep.isNotEmpty) {
-        carreraText = activeProfile.carrerarep;
-      } else if (activeProfile.carrera.isNotEmpty) {
-        carreraText = activeProfile.carrera;
-      }
-    }
+    // Your existing code for profileDataStudent, formattedName and carreraText...
     
     return SafeArea(
       child: Container(
@@ -78,22 +42,27 @@ class _SideBarState extends State<SideBar> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Usar los datos formateados en InfoCard
-              InfoCard(
-                name: formattedName,
-                bio: carreraText,
-              ),
+              // InfoCard...
               Padding(
                 padding: const EdgeInsets.only(left: 24, top: 32, bottom: 16),
                 child: Text(
-                  "BROWSE",
+                  "BROWSE ",
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium!
                       .copyWith(color: Colors.white70),
                 ),
               ),
-              // ... Resto del código o widgets adicionales
+              // Updated Profile button
+              ListTile(
+                leading: const Icon(Icons.person),
+                titleTextStyle: const TextStyle(color: Colors.white),
+                title: const Text('Perfil'),
+                onTap: () {
+                  Navigator.pushNamed(context, '/profile');
+                },
+              ),
+              // Add more menu items as needed...
             ],
           ),
         ),

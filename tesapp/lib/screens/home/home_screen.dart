@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../controllers/dashboard_controller.dart';
-import 'components/course_card.dart';
-
+import 'package:rive_animation/controllers/dashboard_controller.dart';
+import 'package:rive_animation/screens/home/components/course_card.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
