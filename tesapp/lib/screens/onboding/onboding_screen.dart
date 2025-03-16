@@ -72,7 +72,7 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
                       child: Column(
                         children: [
                           Text(
-                            "Learn design & code",
+                            "App TESA",
                             style: TextStyle(
                               fontSize: 60,
                               fontWeight: FontWeight.w700,
@@ -82,7 +82,7 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
                           ),
                           SizedBox(height: 16),
                           Text(
-                            "Don’t skip design. Learn design and code, by building real apps with Flutter and Swift. Complete courses about the best tools.",
+                            "App de notificación y gestión académica de TESA.",
                           ),
                         ],
                       ),
@@ -119,7 +119,7 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 24),
                       child: Text(
-                          "Purchase includes access to 30+ courses, 240+ premium tutorials, 120+ hours of videos, source files and certificates."),
+                          "Presione el botón para iniciar sesión."),
                     )
                   ],
                 ),
