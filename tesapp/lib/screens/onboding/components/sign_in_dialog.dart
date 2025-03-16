@@ -41,7 +41,7 @@ void showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
                   child: Column(
                     children: [
                       const Text(
-                        "Sign in",
+                        "Iniciar sesión",
                         style: TextStyle(
                           fontSize: 34,
                           fontFamily: "Poppins",
@@ -51,7 +51,11 @@ void showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
-                          "Access to 240+ hours of content. Learn design and code, by building real apps with Flutter and Swift.",
+                          "Ingrese su usuario y contraseña",
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 16,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
