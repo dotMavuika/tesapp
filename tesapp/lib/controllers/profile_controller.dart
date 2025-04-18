@@ -235,4 +235,6 @@ class ProfileController {
     
     return await fetchProfileData(profileData.auth);
   }
+
+  getProfileData() {}
 }

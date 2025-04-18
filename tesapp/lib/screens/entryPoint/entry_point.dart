@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 import 'package:rive_animation/constants.dart';
 import 'package:rive_animation/screens/home/home_screen.dart';
+import 'package:rive_animation/screens/profile/general_profile.dart';
 import 'package:rive_animation/utils/rive_utils.dart';
 
 import '../../model/menu.dart';
@@ -25,14 +26,31 @@ class _EntryPointState extends State<EntryPoint>
   Menu selectedBottonNav = bottomNavItems.first;
   Menu selectedSideMenu = sidebarMenus.first;
 
+  // Identificador para la pantalla actualmente mostrada
+  String currentScreen = "home"; // Por defecto, muestra el home
+
   late SMIBool isMenuOpenInput;
 
   void updateSelectedBtmNav(Menu menu) {
     if (selectedBottonNav != menu) {
       setState(() {
         selectedBottonNav = menu;
+        // Aquí podrías actualizar también currentScreen basado en el botón de navegación
       });
     }
+  }
+
+  // Método para cambiar la pantalla actual
+  void changeScreen(String screenName) {
+    setState(() {
+      currentScreen = screenName;
+      // Cerrar el menú lateral al cambiar de pantalla
+      if (isSideBarOpen) {
+        isMenuOpenInput.value = false;
+        _animationController.reverse();
+        isSideBarOpen = false;
+      }
+    });
   }
 
   late AnimationController _animationController;
@@ -61,6 +79,17 @@ class _EntryPointState extends State<EntryPoint>
     super.dispose();
   }
 
+  // Método para obtener la pantalla actual basada en currentScreen
+  Widget _getCurrentScreen() {
+    switch (currentScreen) {
+      case "profile":
+        return const GeneralProfile();
+      case "home":
+      default:
+        return const HomePage();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +105,10 @@ class _EntryPointState extends State<EntryPoint>
             curve: Curves.fastOutSlowIn,
             left: isSideBarOpen ? 0 : -288,
             top: 0,
-            child: const SideBar(),
+            child: SideBar(
+              onProfileTap: () => changeScreen("profile"),
+  onHomeTap: () => changeScreen("home"),
+),
           ),
           Transform(
             alignment: Alignment.center,
@@ -88,11 +120,11 @@ class _EntryPointState extends State<EntryPoint>
               offset: Offset(animation.value * 265, 0),
               child: Transform.scale(
                 scale: scalAnimation.value,
-                child: const ClipRRect(
-                  borderRadius: BorderRadius.all(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(
                     Radius.circular(24),
                   ),
-                  child: HomePage(),
+                  child: _getCurrentScreen(), // Mostrar la pantalla actual
                 ),
               ),
             ),
@@ -162,6 +194,14 @@ class _EntryPointState extends State<EntryPoint>
                       press: () {
                         RiveUtils.chnageSMIBoolState(navBar.rive.status!);
                         updateSelectedBtmNav(navBar);
+                        
+                        // Cambiar pantalla basado en el botón seleccionado
+                        if (navBar.title == "Home") {
+                          changeScreen("home");
+                        } else if (navBar.title == "Profile") {
+                          changeScreen("profile");
+                        }
+                        // Añadir más condiciones según tus botones de navegación
                       },
                       riveOnInit: (artboard) {
                         navBar.rive.status = RiveUtils.getRiveInput(artboard,

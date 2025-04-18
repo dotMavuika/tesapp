@@ -440,10 +440,10 @@
       "languageVersion": "3.5"
     }
   ],
-  "generated": "2025-03-11T15:51:41.413583Z",
+  "generated": "2025-04-18T21:03:35.390939Z",
   "generator": "pub",
-  "generatorVersion": "3.7.0",
+  "generatorVersion": "3.7.2",
   "flutterRoot": "file:///C:/SDK/flutter",
-  "flutterVersion": "3.29.0",
+  "flutterVersion": "3.29.3",
   "pubCache": "file:///C:/Users/SISTEMAS%202/AppData/Local/Pub/Cache"
 }

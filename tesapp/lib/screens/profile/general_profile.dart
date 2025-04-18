@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rive_animation/controllers/profile_controller.dart';
 import './components/photo_importer.dart';
 import 'package:rive_animation/model/global_vars.dart';
