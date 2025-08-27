@@ -2,9 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rive/rive.dart';
-import 'package:rive_animation/screens/entryPoint/entry_point.dart';
+// Corrige esta importación para que coincida con la ubicación exacta de tu archivo entry_point.dart
+import 'package:tesapp/screens/entryPoint/entry_point.dart';
 // Importar el controlador
-import 'package:rive_animation/controllers/login_controller.dart';
+import 'package:tesapp/controllers/login_controller.dart';
 
 class SignInForm extends StatefulWidget {
   const SignInForm({
@@ -23,11 +24,11 @@ class _SignInFormState extends State<SignInForm> {
   late SMITrigger success;
   late SMITrigger reset;
   late SMITrigger confetti;
-  
+
   // Controladores para los campos de texto
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  
+
   // Instancia del controlador de login
   final LoginController _loginController = LoginController();
 
@@ -40,7 +41,7 @@ class _SignInFormState extends State<SignInForm> {
 
   void _onCheckRiveInit(Artboard artboard) {
     StateMachineController? controller =
-        StateMachineController.fromArtboard(artboard, 'State Machine 1');
+    StateMachineController.fromArtboard(artboard, 'State Machine 1');
 
     artboard.addController(controller!);
     error = controller.findInput<bool>('Error') as SMITrigger;
@@ -50,11 +51,11 @@ class _SignInFormState extends State<SignInForm> {
 
   void _onConfettiRiveInit(Artboard artboard) {
     StateMachineController? controller =
-        StateMachineController.fromArtboard(artboard, "State Machine 1");
+    StateMachineController.fromArtboard(artboard, "State Machine 1");
     artboard.addController(controller!);
 
     confetti = controller.findInput<bool>("Trigger explosion") as SMITrigger;
-    
+
     // Si isShowConfetti es true, disparar la animación de confeti inmediatamente
     if (isShowConfetti) {
       confetti.fire();
@@ -65,49 +66,51 @@ class _SignInFormState extends State<SignInForm> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     // Mostrar la animación de carga
     setState(() {
       isShowLoading = true;
     });
-    
+
     // Obtener los valores de los campos
     final user = _userController.text;
     final password = _passwordController.text;
-    
+
     try {
       // Enviar datos al controlador para validación
       final result = await _loginController.login(user, password);
-      
+
       if (result['success']) {
         // Éxito en la autenticación
         success.fire();
-        
+
         // Esperar a que termine la animación de éxito
         await Future.delayed(const Duration(seconds: 2));
-        
+
         // Primero ocultar la animación de carga
         setState(() {
           isShowLoading = false;
         });
-        
+
         // Luego mostrar y disparar el confeti
         setState(() {
           isShowConfetti = true;
         });
-        
+
         // Dar tiempo para que el widget de confeti se inicialice
         await Future.delayed(const Duration(milliseconds: 200));
-        
+
         if (mounted) {
           confetti.fire();
         }
-        
+
         // Esperar y navegar
         await Future.delayed(const Duration(seconds: 1));
-        
+
         if (!context.mounted) return;
-        Navigator.push(
+
+        // Asegúrate de que esta navegación sea correcta
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => const EntryPoint(),
@@ -116,17 +119,17 @@ class _SignInFormState extends State<SignInForm> {
       } else {
         // Error en la autenticación
         error.fire();
-        
+
         // Esperar a que termine la animación de error
         await Future.delayed(const Duration(seconds: 2));
-        
+
         // Ocultar la animación de carga y mostrar mensaje de error
         setState(() {
           isShowLoading = false;
         });
-        
+
         reset.fire();
-        
+
         // Mostrar mensaje de error
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -139,15 +142,15 @@ class _SignInFormState extends State<SignInForm> {
     } catch (e) {
       // Error en la conexión o procesamiento
       error.fire();
-      
+
       await Future.delayed(const Duration(seconds: 2));
-      
+
       setState(() {
         isShowLoading = false;
       });
-      
+
       reset.fire();
-      
+
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -248,22 +251,22 @@ class _SignInFormState extends State<SignInForm> {
         ),
         isShowLoading
             ? CustomPositioned(
-                child: RiveAnimation.asset(
-                  'assets/RiveAssets/check.riv',
-                  fit: BoxFit.cover,
-                  onInit: _onCheckRiveInit,
-                ),
-              )
+          child: RiveAnimation.asset(
+            'assets/RiveAssets/check.riv',
+            fit: BoxFit.cover,
+            onInit: _onCheckRiveInit,
+          ),
+        )
             : const SizedBox(),
         isShowConfetti
             ? CustomPositioned(
-                scale: 6,
-                child: RiveAnimation.asset(
-                  "assets/RiveAssets/confetti.riv",
-                  onInit: _onConfettiRiveInit,
-                  fit: BoxFit.cover,
-                ),
-              )
+          scale: 6,
+          child: RiveAnimation.asset(
+            "assets/RiveAssets/confetti.riv",
+            onInit: _onConfettiRiveInit,
+            fit: BoxFit.cover,
+          ),
+        )
             : const SizedBox(),
       ],
     );

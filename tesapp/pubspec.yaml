@@ -1,4 +1,4 @@
-name: rive_animation
+name: tesapp
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -40,7 +40,7 @@ dependencies:
   flutter_svg: ^2.0.10
   cached_network_image: ^3.4.1
   flutter_cache_manager: ^3.4.1
-  http: ^1.3.0
+  http: ^1.4.0
 
 dev_dependencies:
   flutter_test:

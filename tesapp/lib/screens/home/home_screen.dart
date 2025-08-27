@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rive_animation/controllers/dashboard_controller.dart';
-import 'package:rive_animation/screens/home/components/course_card.dart';
-import 'package:rive_animation/screens/schedule/schedule_screen.dart'; // Importar la pantalla de horarios
-import 'package:rive_animation/screens/grades/grades_screen.dart'; // Importar la pantalla de calificaciones
+import 'package:tesapp/controllers/dashboard_controller.dart';
+import 'package:tesapp/screens/home/components/course_card.dart';
+import 'package:tesapp/screens/schedule/schedule_screen.dart'; // Importar la pantalla de horarios
+import 'package:tesapp/screens/grades/grades_screen.dart'; // Importar la pantalla de calificaciones
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       Row(
                         children: [
-                          // Botón de calificaciones
+                        /*  // Botón de calificaciones
                           IconButton(
                             icon: const Icon(Icons.school),
                             tooltip: 'Calificaciones',
@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               );
                             },
-                          ),
+                          ),*/
                           // Botón de actualizar
                           controller.isLoading
                               ? const SizedBox(

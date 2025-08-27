@@ -32,7 +32,7 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned(
+          /* Positioned(
             width: MediaQuery.of(context).size.width * 1.7,
             left: 100,
             bottom: 100,
@@ -40,7 +40,7 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
               "assets/Backgrounds/Spline.png",
             ),
           ),
-          Positioned.fill(
+         Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: const SizedBox(),
@@ -54,7 +54,7 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
               filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
               child: const SizedBox(),
             ),
-          ),
+          ),*/
           AnimatedPositioned(
             top: isShowSignInDialog ? -50 : 0,
             height: MediaQuery.of(context).size.height,
@@ -64,7 +64,7 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Spacer(),
                     const SizedBox(

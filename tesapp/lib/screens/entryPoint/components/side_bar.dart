@@ -5,12 +5,14 @@ import '../../../controllers/profile_controller.dart';
 class SideBar extends StatefulWidget {
   final VoidCallback onProfileTap;
   final VoidCallback onHomeTap;
+  final VoidCallback onLogoutTap; // Nuevo callback para logout
   // Puedes añadir más callbacks según necesites
 
   const SideBar({
-    super.key, 
-    required this.onProfileTap, 
+    super.key,
+    required this.onProfileTap,
     required this.onHomeTap,
+    required this.onLogoutTap, // Agregar el nuevo parámetro requerido
   });
 
   @override
@@ -20,13 +22,13 @@ class SideBar extends StatefulWidget {
 class _SideBarState extends State<SideBar> {
   Menu selectedSideMenu = sidebarMenus.first;
   late ProfileController profileController;
-  
+
   @override
   void initState() {
     super.initState();
     profileController = ProfileController();
   }
-  
+
   // Método para formatear el nombre completo si necesitas mostrar info del perfil
   String formatFullName(String fullName) {
     final parts = fullName.split(' ');
@@ -35,23 +37,23 @@ class _SideBarState extends State<SideBar> {
     }
     return fullName;
   }
-  
+
   @override
   Widget build(BuildContext context) {
     // Intentar obtener datos del perfil si están disponibles
     final profileDataStudent = profileController.getProfileData();
-    
+
     // Formatear el nombre y carrera si hay datos disponibles
-    final formattedName = profileDataStudent != null 
+    final formattedName = profileDataStudent != null
         ? formatFullName(profileDataStudent.persona)
         : 'Usuario';
-        
+
     // Obtener carrera si hay un perfil activo
     final activeProfile = profileController.getActiveProfile();
     final carreraText = activeProfile?.carrerarep.isNotEmpty == true
         ? activeProfile!.carrerarep
         : (activeProfile?.carrera ?? 'Estudiante');
-    
+
     return SafeArea(
       child: Container(
         width: 288,
@@ -117,7 +119,7 @@ class _SideBarState extends State<SideBar> {
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Divider(color: Colors.white24),
               ),
-              
+
               // Sección de navegación
               Padding(
                 padding: const EdgeInsets.only(left: 24, top: 32, bottom: 16),
@@ -129,51 +131,51 @@ class _SideBarState extends State<SideBar> {
                       .copyWith(color: Colors.white70),
                 ),
               ),
-              
+
               // Elementos del menú
               _buildMenuItem(
-                icon: Icons.home_outlined, 
+                icon: Icons.home_outlined,
                 title: 'Inicio',
                 isSelected: selectedSideMenu.title == "Home",
                 onTap: widget.onHomeTap,
               ),
-              
+
               _buildMenuItem(
-                icon: Icons.person_outline, 
+                icon: Icons.person_outline,
                 title: 'Perfil',
                 isSelected: selectedSideMenu.title == "Profile",
                 onTap: widget.onProfileTap,
               ),
-              
+
               _buildMenuItem(
-                icon: Icons.calendar_today_outlined, 
+                icon: Icons.calendar_today_outlined,
                 title: 'Horario',
                 isSelected: selectedSideMenu.title == "Calendar",
                 onTap: () {
                   // Puedes agregar más callbacks aquí según necesites
                 },
               ),
-              
+
               _buildMenuItem(
-                icon: Icons.school_outlined, 
+                icon: Icons.school_outlined,
                 title: 'Calificaciones',
                 isSelected: selectedSideMenu.title == "Grades",
                 onTap: () {
                   // Callback para calificaciones
                 },
               ),
-              
+
               _buildMenuItem(
-                icon: Icons.payment_outlined, 
+                icon: Icons.payment_outlined,
                 title: 'Pagos',
                 isSelected: selectedSideMenu.title == "Payments",
                 onTap: () {
                   // Callback para pagos
                 },
               ),
-              
+
               const Spacer(),
-              
+
               // Sección inferior
               Padding(
                 padding: const EdgeInsets.only(left: 24, top: 32, bottom: 16),
@@ -185,25 +187,33 @@ class _SideBarState extends State<SideBar> {
                       .copyWith(color: Colors.white70),
                 ),
               ),
-              
+
               _buildMenuItem(
-                icon: Icons.settings_outlined, 
+                icon: Icons.settings_outlined,
                 title: 'Ajustes',
                 isSelected: selectedSideMenu.title == "Settings",
                 onTap: () {
                   // Callback para ajustes
                 },
               ),
-              
+
               _buildMenuItem(
-                icon: Icons.help_outline, 
+                icon: Icons.help_outline,
                 title: 'Ayuda',
                 isSelected: selectedSideMenu.title == "Help",
                 onTap: () {
                   // Callback para ayuda
                 },
               ),
-              
+
+              // Botón de logout
+              _buildMenuItem(
+                icon: Icons.logout,
+                title: 'Cerrar Sesión',
+                isSelected: selectedSideMenu.title == "Logout",
+                onTap: widget.onLogoutTap,
+              ),
+
               const SizedBox(height: 24),
             ],
           ),
@@ -211,7 +221,7 @@ class _SideBarState extends State<SideBar> {
       ),
     );
   }
-  
+
   // Widget personalizado para los ítems del menú
   Widget _buildMenuItem({
     required IconData icon,

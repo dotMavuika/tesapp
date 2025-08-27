@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'controllers/dashboard_controller.dart';
-import 'package:rive_animation/screens/onboding/onboding_screen.dart';
+import 'package:tesapp/screens/onboding/onboding_screen.dart';
 import 'screens/profile/general_profile.dart';
 
 void main() {

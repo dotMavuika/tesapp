@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:rive_animation/controllers/profile_controller.dart';
+import 'package:tesapp/controllers/profile_controller.dart';
 import './components/photo_importer.dart';
-import 'package:rive_animation/model/global_vars.dart';
-import 'package:rive_animation/model/profile_data.dart';
+import 'package:tesapp/model/global_vars.dart';
+import 'package:tesapp/model/profile_data.dart';
 
 class GeneralProfile extends StatefulWidget {
   const GeneralProfile({super.key});
