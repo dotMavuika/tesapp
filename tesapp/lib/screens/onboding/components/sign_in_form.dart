@@ -197,7 +197,7 @@ class _SignInFormState extends State<SignInForm> {
                 ),
               ),
               const Text(
-                "Password",
+                "Contraseña",
                 style: TextStyle(
                   color: Colors.black54,
                 ),
@@ -228,7 +228,7 @@ class _SignInFormState extends State<SignInForm> {
                     signIn(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF77D8E),
+                    backgroundColor: const Color(0xFF7C3E8E),
                     minimumSize: const Size(double.infinity, 56),
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.only(
@@ -241,9 +241,9 @@ class _SignInFormState extends State<SignInForm> {
                   ),
                   icon: const Icon(
                     CupertinoIcons.arrow_right,
-                    color: Color(0xFFFE0037),
+                    color: Color(0xFFE6B420),
                   ),
-                  label: const Text("Sign In"),
+                  label: const Text("Aceptar"),
                 ),
               ),
             ],

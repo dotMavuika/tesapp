@@ -55,57 +55,28 @@ class _HomePageState extends State<HomePage> {
                             .textTheme
                             .headlineMedium!
                             .copyWith(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold),
                       ),
                       Row(
                         children: [
-                        /*  // Botón de calificaciones
-                          IconButton(
-                            icon: const Icon(Icons.school),
-                            tooltip: 'Calificaciones',
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const GradesScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                          // Botón de horarios
-                          IconButton(
-                            icon: const Icon(Icons.schedule),
-                            tooltip: 'Horario de clases',
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ScheduleScreen(),
-                                ),
-                              );
-                            },
-                          ),*/
                           // Botón de actualizar
                           controller.isLoading
                               ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
-                                )
+                            width: 20,
+                            height: 20,
+                            child:
+                            CircularProgressIndicator(strokeWidth: 2),
+                          )
                               : IconButton(
-                                  icon: const Icon(Icons.refresh),
-                                  onPressed: () => controller.fetchNews(),
-                                ),
+                            icon: const Icon(Icons.refresh),
+                            onPressed: () => controller.fetchNews(),
+                          ),
                         ],
                       ),
                     ],
                   ),
                 ),
-
-                // Sección de accesos rápidos
-                _buildQuickAccessSection(context),
 
                 // Sección de noticias
                 _buildNewsSection(controller),
@@ -115,118 +86,6 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickAccessSection(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Accesos Rápidos",
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildAccessButton(
-                context,
-                icon: Icons.schedule,
-                label: "Horario",
-                color: Colors.blue,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ScheduleScreen(),
-                    ),
-                  );
-                },
-              ),
-              _buildAccessButton(
-                context,
-                icon: Icons.assignment,
-                label: "Tareas",
-                color: Colors.green,
-                onTap: () {
-                  // Navegar a la pantalla de tareas cuando esté disponible
-                },
-              ),
-              _buildAccessButton(
-                context,
-                icon: Icons.school,
-                label: "Calificaciones",
-                color: Colors.purple,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const GradesScreen(),
-                    ),
-                  );
-                },
-              ),
-              _buildAccessButton(
-                context,
-                icon: Icons.calendar_today,
-                label: "Calendario",
-                color: Colors.orange,
-                onTap: () {
-                  // Navegar a la pantalla de calendario cuando esté disponible
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 25),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAccessButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: 70,
-        child: Column(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 26,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
         ),
       ),
     );
@@ -243,17 +102,24 @@ class _HomePageState extends State<HomePage> {
     }
 
     if (controller.news.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Text(
-            "No hay noticias disponibles",
-            style: TextStyle(
-              fontSize: 16,
-              fontStyle: FontStyle.italic,
+      return Column(
+        children: [
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text(
+                "No hay noticias disponibles",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
             ),
           ),
-        ),
+          const SizedBox(height: 30),
+          // ✅ ACCESOS RÁPIDOS MOVIDOS AQUÍ - debajo del mensaje de no noticias
+          _buildQuickAccessSection(context),
+        ],
       );
     }
 
@@ -266,8 +132,8 @@ class _HomePageState extends State<HomePage> {
           child: Text(
             "Últimas Noticias",
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(height: 15),
@@ -287,7 +153,105 @@ class _HomePageState extends State<HomePage> {
             },
           ),
         ),
+        const SizedBox(height: 30),
+        // ✅ ACCESOS RÁPIDOS TAMBIÉN AQUÍ - cuando hay noticias
+        _buildQuickAccessSection(context),
       ],
+    );
+  }
+
+  Widget _buildQuickAccessSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Accesos Rápidos",
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // ✅ SOLO HORARIO Y CALIFICACIONES - quitados Tareas y Calendario
+              _buildAccessButton(
+                context,
+                icon: Icons.schedule,
+                label: "Horario",
+                color: Colors.blue,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ScheduleScreen(),
+                    ),
+                  );
+                },
+              ),
+              _buildAccessButton(
+                context,
+                icon: Icons.school,
+                label: "Calificaciones",
+                color: Colors.purple,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const GradesScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 25),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccessButton(
+      BuildContext context, {
+        required IconData icon,
+        required String label,
+        required Color color,
+        required VoidCallback onTap,
+      }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: 100, // ✅ Ancho aumentado para mejor distribución
+        child: Column(
+          children: [
+            Container(
+              width: 60, // ✅ Tamaño aumentado
+              height: 60,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: color,
+                size: 30, // ✅ Ícono más grande
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14, // ✅ Texto ligeramente más grande
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

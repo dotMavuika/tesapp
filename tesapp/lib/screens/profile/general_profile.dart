@@ -40,8 +40,10 @@ class _GeneralProfileState extends State<GeneralProfile> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mi Perfil'),
-        backgroundColor: const Color(0xFF17203A),
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xF5F5F5FF),
+        foregroundColor: Colors.black,
+        automaticallyImplyLeading: false,
+
       ),
       body: Container(
         decoration: BoxDecoration(

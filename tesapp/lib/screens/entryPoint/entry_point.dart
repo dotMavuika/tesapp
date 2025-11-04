@@ -5,15 +5,15 @@ import 'package:rive/rive.dart';
 import 'package:tesapp/constants.dart';
 import 'package:tesapp/screens/home/home_screen.dart';
 import 'package:tesapp/screens/profile/general_profile.dart';
+import 'package:tesapp/screens/finance/finance_vew.dart'; // Importar FinanceView
 import 'package:tesapp/utils/rive_utils.dart';
-import 'package:tesapp/screens/onboding/onboding_screen.dart'; // Importar la pantalla de onboarding
-import 'package:tesapp/controllers/logout_controller.dart'; // Importar el controlador de logout
+import 'package:tesapp/screens/onboding/onboding_screen.dart';
+import 'package:tesapp/controllers/logout_controller.dart';
 
 import '../../model/menu.dart';
 import 'components/menu_btn.dart';
 import 'components/side_bar.dart';
 
-// Asegúrate de que esta sea la clase principal y esté exportada correctamente
 class EntryPoint extends StatefulWidget {
   const EntryPoint({super.key});
 
@@ -24,13 +24,13 @@ class EntryPoint extends StatefulWidget {
 class _EntryPointState extends State<EntryPoint>
     with SingleTickerProviderStateMixin {
   bool isSideBarOpen = false;
-  final LogoutController _logoutController = LogoutController(); // Instancia del controlador
+  final LogoutController _logoutController = LogoutController();
 
   Menu selectedBottonNav = bottomNavItems.first;
   Menu selectedSideMenu = sidebarMenus.first;
 
   // Identificador para la pantalla actualmente mostrada
-  String currentScreen = "home"; // Por defecto, muestra el home
+  String currentScreen = "home";
 
   late SMIBool isMenuOpenInput;
 
@@ -44,11 +44,12 @@ class _EntryPointState extends State<EntryPoint>
 
   // Método para cambiar la pantalla actual
   void changeScreen(String screenName) {
+    print('Cambiando a pantalla: $screenName'); // Debug
     setState(() {
       currentScreen = screenName;
       // Cerrar el menú lateral al cambiar de pantalla
       if (isSideBarOpen) {
-        isMenuOpenInput.value = false;
+        isMenuOpenInput.value = true; // ✅ INVERTIDO: Ahora true cierra (hamburguesa)
         _animationController.reverse();
         isSideBarOpen = false;
       }
@@ -57,6 +58,15 @@ class _EntryPointState extends State<EntryPoint>
 
   // Método para manejar el logout
   void handleLogout() async {
+    // Cerrar el sidebar primero
+    if (isSideBarOpen) {
+      isMenuOpenInput.value = true; // ✅ INVERTIDO: Ahora true cierra (hamburguesa)
+      _animationController.reverse();
+      setState(() {
+        isSideBarOpen = false;
+      });
+    }
+
     // Mostrar indicador de carga
     showDialog(
       context: context,
@@ -70,22 +80,24 @@ class _EntryPointState extends State<EntryPoint>
     final result = await _logoutController.logout();
 
     // Cerrar el diálogo de carga
-    Navigator.of(context).pop();
+    if (mounted) {
+      Navigator.of(context).pop();
 
-    // Navegar a la pantalla de onboarding
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const OnbodingScreen()),
-          (route) => false,
-    );
-
-    // Opcionalmente mostrar mensaje de error si ocurrió alguno
-    if (!result['success']) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Nota: ${result['message']}'),
-          duration: const Duration(seconds: 3),
-        ),
+      // Navegar a la pantalla de onboarding
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const OnbodingScreen()),
+            (route) => false,
       );
+
+      // Opcionalmente mostrar mensaje de error si ocurrió alguno
+      if (!result['success']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Nota: ${result['message']}'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
@@ -95,6 +107,7 @@ class _EntryPointState extends State<EntryPoint>
 
   @override
   void initState() {
+    super.initState();
     _animationController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 200))
       ..addListener(() {
@@ -104,7 +117,6 @@ class _EntryPointState extends State<EntryPoint>
         parent: _animationController, curve: Curves.fastOutSlowIn));
     animation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
         parent: _animationController, curve: Curves.fastOutSlowIn));
-    super.initState();
   }
 
   @override
@@ -115,9 +127,12 @@ class _EntryPointState extends State<EntryPoint>
 
   // Método para obtener la pantalla actual basada en currentScreen
   Widget _getCurrentScreen() {
+    print('Pantalla actual: $currentScreen'); // Debug
     switch (currentScreen) {
       case "profile":
         return const GeneralProfile();
+      case "finance": // ✅ NUEVA OPCIÓN - Finanzas
+        return const FinanceView();
       case "home":
       default:
         return const HomePage();
@@ -129,7 +144,7 @@ class _EntryPointState extends State<EntryPoint>
     return Scaffold(
       extendBody: true,
       resizeToAvoidBottomInset: false,
-      backgroundColor: backgroundColor2,
+      backgroundColor: const Color(0xFF7C3E8E),
       body: Stack(
         children: [
           AnimatedPositioned(
@@ -140,9 +155,22 @@ class _EntryPointState extends State<EntryPoint>
             left: isSideBarOpen ? 0 : -288,
             top: 0,
             child: SideBar(
-              onProfileTap: () => changeScreen("profile"),
-              onHomeTap: () => changeScreen("home"),
-              onLogoutTap: handleLogout,
+              onProfileTap: () {
+                print('Tap en Perfil'); // Debug
+                changeScreen("profile");
+              },
+              onHomeTap: () {
+                print('Tap en Inicio'); // Debug
+                changeScreen("home");
+              },
+              onFinanceTap: () { // ✅ NUEVO CALLBACK - Finanzas
+                print('Tap en Finanzas'); // Debug
+                changeScreen("finance");
+              },
+              onLogoutTap: () {
+                print('Tap en Logout'); // Debug
+                handleLogout();
+              },
             ),
           ),
           Transform(
@@ -158,7 +186,7 @@ class _EntryPointState extends State<EntryPoint>
                   borderRadius: const BorderRadius.all(
                     Radius.circular(24),
                   ),
-                  child: _getCurrentScreen(),
+                  child: _getCurrentScreen(), // ← Aquí se muestra FinanceView con animaciones
                 ),
               ),
             ),
@@ -170,6 +198,7 @@ class _EntryPointState extends State<EntryPoint>
             top: 16,
             child: MenuBtn(
               press: () {
+                // ✅ INVERTIDO: Ahora false abre (X) y true cierra (hamburguesa)
                 isMenuOpenInput.value = !isMenuOpenInput.value;
 
                 if (_animationController.value == 0) {
@@ -190,6 +219,7 @@ class _EntryPointState extends State<EntryPoint>
 
                 isMenuOpenInput =
                 controller.findInput<bool>("isOpen") as SMIBool;
+
                 isMenuOpenInput.value = true;
               },
             ),

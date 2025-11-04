@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'controllers/dashboard_controller.dart';
 import 'package:tesapp/screens/onboding/onboding_screen.dart';
 import 'screens/profile/general_profile.dart';
-
+import 'screens/finance/finance_vew.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -41,6 +41,7 @@ class MyApp extends StatelessWidget {
         routes: {
           '/': (context) => const OnbodingScreen(),
           '/profile': (context) => const GeneralProfile(),
+          '/finance': (context) => const FinanceView(),
         },
         // Change to initialRoute instead of home
         initialRoute: '/',

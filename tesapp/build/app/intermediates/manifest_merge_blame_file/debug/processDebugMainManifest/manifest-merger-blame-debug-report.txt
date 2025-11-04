@@ -34,7 +34,7 @@
 26        android:debuggable="true"
 27        android:extractNativeLibs="true"
 28        android:icon="@mipmap/ic_launcher"
-29        android:label="flutter_upgrde_app" >
+29        android:label="TESApp" >
 30        <activity
 31            android:name="com.example.flutter_upgrde_app.MainActivity"
 32            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
