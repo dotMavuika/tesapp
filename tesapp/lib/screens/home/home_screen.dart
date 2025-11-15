@@ -55,23 +55,23 @@ class _HomePageState extends State<HomePage> {
                             .textTheme
                             .headlineMedium!
                             .copyWith(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold),
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
                       ),
                       Row(
                         children: [
                           // Botón de actualizar
                           controller.isLoading
                               ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child:
-                            CircularProgressIndicator(strokeWidth: 2),
-                          )
+                                  width: 20,
+                                  height: 20,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                )
                               : IconButton(
-                            icon: const Icon(Icons.refresh),
-                            onPressed: () => controller.fetchNews(),
-                          ),
+                                  icon: const Icon(Icons.refresh),
+                                  onPressed: () => controller.fetchNews(),
+                                ),
                         ],
                       ),
                     ],
@@ -132,8 +132,8 @@ class _HomePageState extends State<HomePage> {
           child: Text(
             "Últimas Noticias",
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ),
         const SizedBox(height: 15),
@@ -169,8 +169,8 @@ class _HomePageState extends State<HomePage> {
           Text(
             "Accesos Rápidos",
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 15),
           Row(
@@ -214,16 +214,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildAccessButton(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required Color color,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
-      child: Container(
+      child: SizedBox(
         width: 100, // ✅ Ancho aumentado para mejor distribución
         child: Column(
           children: [

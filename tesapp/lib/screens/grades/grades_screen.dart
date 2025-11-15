@@ -5,7 +5,7 @@ import '../schedule/components/loading_indicator.dart';
 import '../schedule/components/error_message.dart';
 
 class GradesScreen extends StatefulWidget {
-  const GradesScreen({Key? key}) : super(key: key);
+  const GradesScreen({super.key});
 
   @override
   _GradesScreenState createState() => _GradesScreenState();
@@ -347,23 +347,20 @@ class _GradesScreenState extends State<GradesScreen>
                     const SizedBox(height: 8),
 
                     // Lista de notas parciales
-                    ...subject.parciales
-                        .map((parcial) => Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(parcial.name),
-                                  Text(
-                                    parcial.grade.toStringAsFixed(1),
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
+                    ...subject.parciales.map((parcial) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(parcial.name),
+                              Text(
+                                parcial.grade.toStringAsFixed(1),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
                               ),
-                            ))
-                        .toList(),
+                            ],
+                          ),
+                        )),
 
                     const Divider(),
 

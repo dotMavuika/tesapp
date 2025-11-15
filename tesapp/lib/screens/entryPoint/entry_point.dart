@@ -2,11 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
-import 'package:tesapp/constants.dart';
 import 'package:tesapp/screens/home/home_screen.dart';
 import 'package:tesapp/screens/profile/general_profile.dart';
 import 'package:tesapp/screens/finance/finance_vew.dart'; // Importar FinanceView
-import 'package:tesapp/utils/rive_utils.dart';
 import 'package:tesapp/screens/onboding/onboding_screen.dart';
 import 'package:tesapp/controllers/logout_controller.dart';
 
@@ -49,7 +47,8 @@ class _EntryPointState extends State<EntryPoint>
       currentScreen = screenName;
       // Cerrar el menú lateral al cambiar de pantalla
       if (isSideBarOpen) {
-        isMenuOpenInput.value = true; // ✅ INVERTIDO: Ahora true cierra (hamburguesa)
+        isMenuOpenInput.value =
+            true; // ✅ INVERTIDO: Ahora true cierra (hamburguesa)
         _animationController.reverse();
         isSideBarOpen = false;
       }
@@ -60,7 +59,8 @@ class _EntryPointState extends State<EntryPoint>
   void handleLogout() async {
     // Cerrar el sidebar primero
     if (isSideBarOpen) {
-      isMenuOpenInput.value = true; // ✅ INVERTIDO: Ahora true cierra (hamburguesa)
+      isMenuOpenInput.value =
+          true; // ✅ INVERTIDO: Ahora true cierra (hamburguesa)
       _animationController.reverse();
       setState(() {
         isSideBarOpen = false;
@@ -86,7 +86,7 @@ class _EntryPointState extends State<EntryPoint>
       // Navegar a la pantalla de onboarding
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const OnbodingScreen()),
-            (route) => false,
+        (route) => false,
       );
 
       // Opcionalmente mostrar mensaje de error si ocurrió alguno
@@ -163,7 +163,8 @@ class _EntryPointState extends State<EntryPoint>
                 print('Tap en Inicio'); // Debug
                 changeScreen("home");
               },
-              onFinanceTap: () { // ✅ NUEVO CALLBACK - Finanzas
+              onFinanceTap: () {
+                // ✅ NUEVO CALLBACK - Finanzas
                 print('Tap en Finanzas'); // Debug
                 changeScreen("finance");
               },
@@ -177,7 +178,8 @@ class _EntryPointState extends State<EntryPoint>
             alignment: Alignment.center,
             transform: Matrix4.identity()
               ..setEntry(3, 2, 0.001)
-              ..rotateY(1 * animation.value - 30 * (animation.value) * pi / 180),
+              ..rotateY(
+                  1 * animation.value - 30 * (animation.value) * pi / 180),
             child: Transform.translate(
               offset: Offset(animation.value * 265, 0),
               child: Transform.scale(
@@ -186,7 +188,8 @@ class _EntryPointState extends State<EntryPoint>
                   borderRadius: const BorderRadius.all(
                     Radius.circular(24),
                   ),
-                  child: _getCurrentScreen(), // ← Aquí se muestra FinanceView con animaciones
+                  child:
+                      _getCurrentScreen(), // ← Aquí se muestra FinanceView con animaciones
                 ),
               ),
             ),
@@ -212,13 +215,13 @@ class _EntryPointState extends State<EntryPoint>
                 });
               },
               riveOnInit: (artboard) {
-                final controller =
-                StateMachineController.fromArtboard(artboard, "State Machine");
+                final controller = StateMachineController.fromArtboard(
+                    artboard, "State Machine");
 
                 artboard.addController(controller!);
 
                 isMenuOpenInput =
-                controller.findInput<bool>("isOpen") as SMIBool;
+                    controller.findInput<bool>("isOpen") as SMIBool;
 
                 isMenuOpenInput.value = true;
               },

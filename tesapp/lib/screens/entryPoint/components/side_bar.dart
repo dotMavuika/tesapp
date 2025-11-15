@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../model/menu.dart';
 import '../../../controllers/profile_controller.dart';
 
 class SideBar extends StatefulWidget {
@@ -21,7 +20,7 @@ class SideBar extends StatefulWidget {
 }
 
 class _SideBarState extends State<SideBar> {
-  String selectedMenuItem = 'Inicio'; // Cambiado a String para más control
+  String selectedMenuItem = 'Inicio';
   late ProfileController profileController;
 
   @override
@@ -30,15 +29,42 @@ class _SideBarState extends State<SideBar> {
     profileController = ProfileController();
   }
 
-  String formatFullName(String fullName) {
-    final parts = fullName.split(' ');
+  String formatFullName(String? fullName) {
+    if (fullName == null || fullName.isEmpty) return 'Usuario';
+
+    final parts = fullName.trim().split(' ');
     if (parts.length >= 2) {
       return '${parts[0]} ${parts[1]}';
     }
     return fullName;
   }
 
-  // Método helper para manejar la selección
+  String getCarreraDisplay() {
+    final activeProfile = profileController.getActiveProfile();
+    if (activeProfile == null) return 'Estudiante';
+
+    // Si es perfil administrativo
+    if (activeProfile.isAdministrative == true) {
+      if (activeProfile.coordinacion?.isNotEmpty == true) {
+        return activeProfile.coordinacion!;
+      }
+      if (activeProfile.sede?.isNotEmpty == true) {
+        return activeProfile.sede!;
+      }
+      return 'Administrativo';
+    }
+
+    // Si es perfil de estudiante
+    if (activeProfile.carrerarep?.isNotEmpty == true) {
+      return activeProfile.carrerarep!;
+    }
+    if (activeProfile.carrera?.isNotEmpty == true) {
+      return activeProfile.carrera!;
+    }
+
+    return 'Estudiante';
+  }
+
   void _selectMenuItem(String itemName, VoidCallback callback) {
     setState(() {
       selectedMenuItem = itemName;
@@ -49,15 +75,10 @@ class _SideBarState extends State<SideBar> {
   @override
   Widget build(BuildContext context) {
     final profileDataStudent = profileController.getProfileData();
-
-    final formattedName = profileDataStudent != null
-        ? formatFullName(profileDataStudent.persona)
-        : 'Usuario';
-
     final activeProfile = profileController.getActiveProfile();
-    final carreraText = activeProfile?.carrerarep.isNotEmpty == true
-        ? activeProfile!.carrerarep
-        : (activeProfile?.carrera ?? 'Estudiante');
+
+    final formattedName = formatFullName(profileDataStudent?.persona);
+    final carreraText = getCarreraDisplay();
 
     return SafeArea(
       child: Container(
@@ -82,11 +103,13 @@ class _SideBarState extends State<SideBar> {
                     CircleAvatar(
                       backgroundColor: Colors.white24,
                       radius: 30,
-                      backgroundImage: profileDataStudent?.foto != null
-                          ? NetworkImage(profileDataStudent!.foto)
-                          : null,
-                      child: profileDataStudent?.foto == null
-                          ? const Icon(Icons.person, color: Colors.white, size: 30)
+                      backgroundImage:
+                          (profileDataStudent?.foto?.isNotEmpty ?? false)
+                              ? NetworkImage(profileDataStudent!.foto!)
+                              : null,
+                      child: (profileDataStudent?.foto?.isEmpty ?? true)
+                          ? const Icon(Icons.person,
+                              color: Colors.white, size: 30)
                           : null,
                     ),
                     const SizedBox(width: 12),
@@ -135,7 +158,7 @@ class _SideBarState extends State<SideBar> {
                 ),
               ),
 
-              // Elementos del menú con selección actualizada
+              // Elementos del menú
               _buildMenuItem(
                 icon: Icons.home_outlined,
                 title: 'Inicio',
@@ -150,30 +173,33 @@ class _SideBarState extends State<SideBar> {
                 onTap: () => _selectMenuItem('Perfil', widget.onProfileTap),
               ),
 
-              _buildMenuItem(
-                icon: Icons.calendar_today_outlined,
-                title: 'Horario',
-                isSelected: selectedMenuItem == 'Horario',
-                onTap: () => _selectMenuItem('Horario', () {
-                  // Lógica de horario
-                }),
-              ),
+              // Solo mostrar Horario si es estudiante
+              if (profileController.isActiveProfileStudent() == true)
+                _buildMenuItem(
+                  icon: Icons.calendar_today_outlined,
+                  title: 'Horario',
+                  isSelected: selectedMenuItem == 'Horario',
+                  onTap: () => _selectMenuItem('Horario', () {
+                    // TODO: Implementar navegación a Horario
+                  }),
+                ),
 
-              _buildMenuItem(
-                icon: Icons.school_outlined,
-                title: 'Calificaciones',
-                isSelected: selectedMenuItem == 'Calificaciones',
-                onTap: () => _selectMenuItem('Calificaciones', () {
-                  // Lógica de calificaciones
-                }),
-              ),
+              // Solo mostrar Calificaciones si es estudiante
+              if (profileController.isActiveProfileStudent() == true)
+                _buildMenuItem(
+                  icon: Icons.school_outlined,
+                  title: 'Calificaciones',
+                  isSelected: selectedMenuItem == 'Calificaciones',
+                  onTap: () => _selectMenuItem('Calificaciones', () {
+                    // TODO: Implementar navegación a Calificaciones
+                  }),
+                ),
 
-              // ✅ CORREGIDO - Ahora usa el callback del EntryPoint
               _buildMenuItem(
                 icon: Icons.payment_outlined,
-                title: 'Finanzas', // ✅ Corregido el nombre (sin "SS")
+                title: 'Finanzas',
                 isSelected: selectedMenuItem == 'Finanzas',
-                onTap: () => _selectMenuItem('Finanzas', widget.onFinanceTap), // ✅ Usa el callback
+                onTap: () => _selectMenuItem('Finanzas', widget.onFinanceTap),
               ),
 
               const Spacer(),
@@ -195,7 +221,7 @@ class _SideBarState extends State<SideBar> {
                 title: 'Ajustes',
                 isSelected: selectedMenuItem == 'Ajustes',
                 onTap: () => _selectMenuItem('Ajustes', () {
-                  // Lógica de ajustes
+                  // TODO: Implementar navegación a Ajustes
                 }),
               ),
 
@@ -204,7 +230,7 @@ class _SideBarState extends State<SideBar> {
                 title: 'Ayuda',
                 isSelected: selectedMenuItem == 'Ayuda',
                 onTap: () => _selectMenuItem('Ayuda', () {
-                  // Lógica de ayuda
+                  // TODO: Implementar navegación a Ayuda
                 }),
               ),
 
@@ -212,7 +238,8 @@ class _SideBarState extends State<SideBar> {
                 icon: Icons.logout,
                 title: 'Cerrar Sesión',
                 isSelected: selectedMenuItem == 'Cerrar Sesión',
-                onTap: () => _selectMenuItem('Cerrar Sesión', widget.onLogoutTap),
+                onTap: () =>
+                    _selectMenuItem('Cerrar Sesión', widget.onLogoutTap),
               ),
 
               const SizedBox(height: 24),

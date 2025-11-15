@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart' hide Image;
 
@@ -118,8 +116,7 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
                     ),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Text(
-                          "Presione el botón para iniciar sesión."),
+                      child: Text("Presione el botón para iniciar sesión."),
                     )
                   ],
                 ),

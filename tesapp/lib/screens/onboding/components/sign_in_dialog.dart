@@ -32,7 +32,7 @@ void showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
               ),
             ],
           ),
-          child: Scaffold(
+          child: const Scaffold(
             // backgroundColor: Colors.transparent,
             body: Stack(
               clipBehavior: Clip.none,
@@ -40,7 +40,7 @@ void showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
                 SingleChildScrollView(
                   child: Column(
                     children: [
-                      const Text(
+                      Text(
                         "Iniciar sesión",
                         style: TextStyle(
                           fontSize: 34,
@@ -48,7 +48,7 @@ void showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
                           "Ingrese su usuario y contraseña",
@@ -59,8 +59,8 @@ void showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
                           textAlign: TextAlign.center,
                         ),
                       ),
-                      const SignInForm(),
-                      const Row(
+                      SignInForm(),
+                      Row(
                         children: [
                           Expanded(
                             child: Divider(),
@@ -71,7 +71,7 @@ void showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
                     ],
                   ),
                 ),
-                const Positioned(
+                Positioned(
                   left: 0,
                   right: 0,
                   bottom: -48,
