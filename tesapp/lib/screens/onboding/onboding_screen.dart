@@ -38,7 +38,7 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
               "assets/Backgrounds/Spline.png",
             ),
           ),
-         Positioned.fill(
+          Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: const SizedBox(),
@@ -61,31 +61,36 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
+                // 👇 aquí va tu contenido principal
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Spacer(),
-                    const SizedBox(
+
+                    // Centro: logo
+                    SizedBox(
                       width: 260,
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            "App TESA",
-                            style: TextStyle(
-                              fontSize: 60,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: "Poppins",
-                              height: 1.2,
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            "App de notificación y gestión académica de TESA.",
+                          Image.asset(
+                            'assets/icons/tesa_main_logo.png',
+                            height: 250, // puedes ajustar
+                            fit: BoxFit.contain,
                           ),
                         ],
                       ),
                     ),
+
+                    const SizedBox(height: 16),
+
+                    const Text(
+                      "App de notificación y gestión académica de TESA.",
+                      textAlign: TextAlign.center,
+                    ),
+
                     const Spacer(flex: 2),
+
                     AnimatedBtn(
                       btnAnimationController: _btnAnimationController,
                       press: () {
@@ -93,7 +98,7 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
 
                         Future.delayed(
                           const Duration(milliseconds: 800),
-                          () {
+                              () {
                             setState(() {
                               isShowSignInDialog = true;
                             });
@@ -102,22 +107,15 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
                               context,
                               onValue: (_) {},
                             );
-                            // showCustomDialog(
-                            //   context,
-                            //   onValue: (_) {
-                            //     setState(() {
-                            //       isShowSignInDialog = false;
-                            //     });
-                            //   },
-                            // );
                           },
                         );
                       },
                     ),
+
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 24),
                       child: Text("Presione el botón para iniciar sesión."),
-                    )
+                    ),
                   ],
                 ),
               ),
