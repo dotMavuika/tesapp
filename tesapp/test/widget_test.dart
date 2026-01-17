@@ -1,29 +1,29 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tesapp/main.dart';
+import 'package:tesapp/controllers/auth_controller.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Smoke test - carga la app sin crashear', (WidgetTester tester) async {
+    // Crear instancia fake para pruebas
+    final fakeAuth = AuthController.test(
+      isInitialized: true,
+      isLoggedIn: false,
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Crear el widget raíz (tu MyApp requiere authController)
+    final root = MyApp(authController: fakeAuth);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    // Montar la app
+    await tester.pumpWidget(root);
+
+    // Construir el árbol
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // La app debe mostrar un MaterialApp
+    expect(find.byType(MaterialApp), findsOneWidget);
+
+    // Verificar que muestra la pantalla de onboarding (porque isLoggedIn: false)
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 }

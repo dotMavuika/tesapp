@@ -1,5 +1,25 @@
+// lib/model/profile_data.dart
+
+double? _parseDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
+}
+
+bool _parseBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is int) return value != 0;
+  if (value is String) {
+    final v = value.toLowerCase();
+    return v == '1' || v == 'true' || v == 't' || v == 'yes' || v == 'y';
+  }
+  return false;
+}
+
 // -----------------------------
-// Modelo Perfile (corregido)
+// Modelo Perfile
 // -----------------------------
 class Perfile {
   final int? idpu;
@@ -70,7 +90,9 @@ class Perfile {
       qrimage: json['qrimage'] as String?,
       inscripcionid: json['inscripcionid'] as int?,
       activo: json['activo'] as String?,
-      matriculado: json['matriculado'] as bool?,
+      matriculado: json['matriculado'] != null
+          ? _parseBool(json['matriculado'])
+          : null,
       logocoordinacion: json['logocoordinacion'] as String?,
       backgroundapp: json['backgroundapp'] as String?,
       colortextosobrecolor: json['colortextosobrecolor'] as String?,
@@ -101,8 +123,9 @@ class Perfile {
     if (matriculado != null) map['matriculado'] = matriculado;
     if (logocoordinacion != null) map['logocoordinacion'] = logocoordinacion;
     if (backgroundapp != null) map['backgroundapp'] = backgroundapp;
-    if (colortextosobrecolor != null)
+    if (colortextosobrecolor != null) {
       map['colortextosobrecolor'] = colortextosobrecolor;
+    }
     if (periodos != null) map['periodos'] = periodos;
     if (sede != null) map['sede'] = sede;
     if (coordinacion != null) map['coordinacion'] = coordinacion;
@@ -111,19 +134,18 @@ class Perfile {
     return map;
   }
 
-  // ✅ Getters robustos que esperan tus controladores/vistas
   bool get isStudent =>
       (carrera?.isNotEmpty ?? false) || (carrerarep?.isNotEmpty ?? false);
 
   bool get isAdministrative =>
       (administrativoid != null && administrativoid! > 0) ||
-      (profesorid != null && profesorid! > 0) ||
-      (sede?.isNotEmpty ?? false) ||
-      (coordinacion?.isNotEmpty ?? false);
+          (profesorid != null && profesorid! > 0) ||
+          (sede?.isNotEmpty ?? false) ||
+          (coordinacion?.isNotEmpty ?? false);
 }
 
 // -----------------------------
-// Modelo Resumen (sin cambios funcionales)
+// Modelo Resumen
 // -----------------------------
 class Resumen {
   final int? idpu;
@@ -212,14 +234,15 @@ class Resumen {
     if (idinscripcion != null) map['idinscripcion'] = idinscripcion;
     if (logocoordinacion != null) map['logocoordinacion'] = logocoordinacion;
     if (backgroundapp != null) map['backgroundapp'] = backgroundapp;
-    if (colortextosobrecolor != null)
+    if (colortextosobrecolor != null) {
       map['colortextosobrecolor'] = colortextosobrecolor;
+    }
     return map;
   }
 }
 
 // ------------------------------------
-// Modelo ProfileDataStudent (corregido)
+// Modelo ProfileDataStudent
 // ------------------------------------
 class ProfileDataStudent {
   final String? auth;
@@ -266,8 +289,8 @@ class ProfileDataStudent {
       foto: json['foto'] as String?,
       perfiles: json['perfiles'] != null
           ? (json['perfiles'] as List<dynamic>)
-              .map((e) => Perfile.fromJson(e as Map<String, dynamic>))
-              .toList()
+          .map((e) => Perfile.fromJson(e as Map<String, dynamic>))
+          .toList()
           : null,
       resumen: json['resumen'] != null
           ? Resumen.fromJson(json['resumen'] as Map<String, dynamic>)
@@ -290,21 +313,23 @@ class ProfileDataStudent {
     if (genero != null) map['genero'] = genero;
     if (email != null) map['email'] = email;
     if (foto != null) map['foto'] = foto;
-    if (perfiles != null)
+    if (perfiles != null) {
       map['perfiles'] = perfiles!.map((e) => e.toJson()).toList();
+    }
     if (resumen != null) map['resumen'] = resumen!.toJson();
     if (usuario != null) map['usuario'] = usuario;
     if (urlradio != null) map['urlradio'] = urlradio;
     if (identificacion != null) map['identificacion'] = identificacion;
     if (nacimiento != null) map['nacimiento'] = nacimiento;
     if (backgroundapp != null) map['backgroundapp'] = backgroundapp;
-    if (colortextosobrecolor != null)
+    if (colortextosobrecolor != null) {
       map['colortextosobrecolor'] = colortextosobrecolor;
+    }
     if (result != null) map['result'] = result;
     return map;
   }
 
-  /// ✅ Perfil activo: usa `principal == 1`; si no hay, devuelve el primero.
+  /// Perfil activo: usa `principal == 1`; si no hay, devuelve el primero.
   Perfile? get perfilActivo {
     final list = perfiles;
     if (list == null || list.isEmpty) return null;
@@ -314,15 +339,4 @@ class ProfileDataStudent {
       return list.first;
     }
   }
-}
-
-// ------------------------------------
-// Helper para parsear doubles de forma segura
-// ------------------------------------
-double? _parseDouble(dynamic value) {
-  if (value == null) return null;
-  if (value is double) return value;
-  if (value is int) return value.toDouble();
-  if (value is String) return double.tryParse(value);
-  return null;
 }

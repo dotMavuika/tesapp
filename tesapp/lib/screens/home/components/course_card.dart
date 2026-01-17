@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:typed_data';
+import 'dart:io';
+
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+
 import '../../../controllers/dashboard_controller.dart';
 
 class CourseCard extends StatelessWidget {
@@ -28,16 +33,20 @@ class CourseCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  color: Colors.white, fontWeight: FontWeight.w600),
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 10),
-            // Este es el contenedor de la imagen principal (miniatura)
+
+            // Imagen miniatura
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
                 child: _buildImageWidget(newsItem.image),
               ),
             ),
+
             if (newsItem.body.isNotEmpty) ...[
               const SizedBox(height: 10),
               Text(
@@ -45,8 +54,8 @@ class CourseCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: Colors.white,
-                    ),
+                  color: Colors.white,
+                ),
               ),
             ],
           ],
@@ -55,6 +64,52 @@ class CourseCard extends StatelessWidget {
     );
   }
 
+  // =========================
+  // 🔹 SHARE NEWS (IMAGEN + TEXTO)
+  // =========================
+  Future<void> _shareNews(BuildContext context) async {
+    try {
+      final imageBytes = await _fetchImage(newsItem.image);
+
+      final text = '''
+📢 ${newsItem.title}
+
+${newsItem.body}
+
+📱 Compartido desde la app institucional
+''';
+
+      if (imageBytes != null) {
+        final tempDir = await getTemporaryDirectory();
+        final file = File(
+          '${tempDir.path}/news_${DateTime.now().millisecondsSinceEpoch}.png',
+        );
+        await file.writeAsBytes(imageBytes);
+
+        await Share.shareXFiles(
+          [XFile(file.path)],
+          text: text,
+          subject: newsItem.title,
+        );
+      } else {
+        // Fallback: solo texto
+        await Share.share(
+          text,
+          subject: newsItem.title,
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se pudo compartir la noticia'),
+        ),
+      );
+    }
+  }
+
+  // =========================
+  // 🔹 FETCH IMAGE
+  // =========================
   Future<Uint8List?> _fetchImage(String url) async {
     try {
       final response = await http.get(
@@ -66,15 +121,14 @@ class CourseCard extends StatelessWidget {
 
       if (response.statusCode == 200) {
         return response.bodyBytes;
-      } else {
-        print("Error loading image: ${response.statusCode}");
       }
-    } catch (e) {
-      print("Exception: $e");
-    }
+    } catch (_) {}
     return null;
   }
 
+  // =========================
+  // 🔹 IMAGE WIDGET
+  // =========================
   Widget _buildImageWidget(String imageUrl) {
     if (imageUrl.isEmpty) {
       return Container(
@@ -95,6 +149,7 @@ class CourseCard extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
+
         if (snapshot.hasError || snapshot.data == null) {
           return Container(
             color: Colors.grey[300],
@@ -108,10 +163,8 @@ class CourseCard extends StatelessWidget {
           );
         }
 
-        // Usando Container con color de fondo y la imagen con BoxFit.contain
-        // para mantener la proporción sin recortar mientras se ven los bordes redondeados
         return Container(
-          color: const Color.fromARGB(255, 255, 255, 255), // Color de fondo para que se vean los bordes
+          color: Colors.white,
           width: double.infinity,
           height: double.infinity,
           child: Center(
@@ -126,13 +179,15 @@ class CourseCard extends StatelessWidget {
     );
   }
 
-  // Método para mostrar la imagen en un popup cuando se toca la tarjeta
+  // =========================
+  // 🔹 IMAGE POPUP
+  // =========================
   void _showImagePopup(BuildContext context, String imageUrl) {
     if (imageUrl.isEmpty) return;
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (_) {
         return Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: const EdgeInsets.all(12),
@@ -144,15 +199,15 @@ class CourseCard extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Cabecera del popup con título y botón de cerrar
+                // Header
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        newsItem.title.length > 25 
-                            ? '${newsItem.title.substring(0, 25)}...' 
+                        newsItem.title.length > 25
+                            ? '${newsItem.title.substring(0, 25)}...'
                             : newsItem.title,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
@@ -166,23 +221,25 @@ class CourseCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                
-                // Contenedor para la imagen ampliada con capacidad de zoom
-                // No necesita bordes redondeados como la miniatura
+
+                // Imagen ampliada
                 Flexible(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: FutureBuilder<Uint8List?>(
                       future: _fetchImage(imageUrl),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
+
                         if (snapshot.hasError || snapshot.data == null) {
                           return Container(
-                            width: double.infinity,
                             height: 300,
-                            color: const Color.fromARGB(255, 255, 255, 255),
+                            color: Colors.white,
                             child: const Center(
                               child: Icon(
                                 Icons.error_outline,
@@ -193,7 +250,6 @@ class CourseCard extends StatelessWidget {
                           );
                         }
 
-                        // Usar InteractiveViewer para permitir zoom y paneos
                         return InteractiveViewer(
                           minScale: 0.5,
                           maxScale: 3.0,
@@ -207,19 +263,16 @@ class CourseCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                
-                // Botón de descargar o compartir (opcional)
+
+                // Botón compartir
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: TextButton.icon(
                     icon: const Icon(Icons.share),
                     label: const Text("Compartir"),
                     onPressed: () {
-                      // Aquí se podría implementar la función para compartir
                       Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Compartiendo imagen...')),
-                      );
+                      _shareNews(context);
                     },
                   ),
                 ),
@@ -231,6 +284,9 @@ class CourseCard extends StatelessWidget {
     );
   }
 
+  // =========================
+  // 🔹 COLOR BY TYPE
+  // =========================
   Color _getColorByType(int type) {
     switch (type) {
       case 1:

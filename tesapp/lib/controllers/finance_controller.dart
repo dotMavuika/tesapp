@@ -1,35 +1,30 @@
+// lib/controllers/finance_controller.dart
 import 'dart:convert';
-import '../model/finance_data.dart';
-import '../model/global_vars.dart';
 import 'package:http/http.dart' as http;
+
+import '../model/finance_data.dart';
+import '../services/local_storage_service.dart';
+import 'auth_controller.dart';
 
 class FinanceController {
   // Singleton instance
   static final FinanceController _instance = FinanceController._internal();
 
   // Factory constructor
-  factory FinanceController() {
-    return _instance;
-  }
+  factory FinanceController() => _instance;
 
   // Private constructor
   FinanceController._internal();
 
-  // Claves para almacenar los datos en GlobalVars
-  static const String _financeDataKey = 'financeData';
-  static const String _sessionCookieKey = 'sessionCookie';
-
-  /// Obtiene los datos financieros desde el servidor
+  /// Llama a /apimobile/finanzas con el [authToken].
   ///
-  /// Recibe el [authToken] y devuelve un Map con:
-  /// - 'success': true si la operación fue exitosa, false en caso contrario
-  /// - 'message': mensaje de éxito o error
+  /// - Usa la cookie actual desde AuthController.
+  /// - Si es exitoso, guarda FinanceData en LocalStorageService.
   Future<Map<String, dynamic>> fetchFinanceData(String authToken) async {
     try {
-      // Obtener la cookie de sesión
-      final String? sessionCookie = _getSessionCookie();
+      final String? sessionCookie = AuthController.instance.getSessionCookie();
 
-      if (sessionCookie == null) {
+      if (sessionCookie == null || sessionCookie.isEmpty) {
         return {
           'success': false,
           'message':
@@ -37,12 +32,10 @@ class FinanceController {
         };
       }
 
-      // Configurar el cliente HTTP
       final client = http.Client();
 
       try {
-        print('Enviando solicitud de finanzas con token: $authToken');
-        print('Cookie de sesión: $sessionCookie');
+
 
         final response = await client.post(
           Uri.parse('https://tesa.academicok.com/apimobile/finanzas'),
@@ -57,13 +50,10 @@ class FinanceController {
           },
         );
 
-        // Verificar si hubo redirección (código 302)
+        // Manejo de redirección (302) como en otros controladores
         if (response.statusCode == 302) {
-          // Extraer la URL de redirección
           final redirectUrl = response.headers['location'];
           if (redirectUrl != null) {
-            print('Siguiendo redirección a: $redirectUrl');
-            // Seguir la redirección manualmente con la misma cookie
             final redirectResponse = await client.get(
               Uri.parse(redirectUrl),
               headers: {
@@ -79,7 +69,6 @@ class FinanceController {
         client.close();
       }
     } catch (e) {
-      print('Error de conexión: $e');
       return {
         'success': false,
         'message': 'Error de conexión: ${e.toString()}',
@@ -87,14 +76,11 @@ class FinanceController {
     }
   }
 
-  /// Procesa la respuesta HTTP
+  /// Procesa la respuesta HTTP y, si es correcta, guarda los datos en Hive.
   Map<String, dynamic> _processResponse(http.Response response) {
     if (response.statusCode == 200) {
       try {
-        // Imprimir la respuesta para depuración
-        print('Respuesta del servidor (finanzas): ${response.body}');
 
-        // Verificar si la respuesta está vacía
         if (response.body.isEmpty) {
           return {
             'success': false,
@@ -113,18 +99,16 @@ class FinanceController {
 
         if (data['result'] == "ok") {
           try {
-            // Crear objeto FinanceData
             final financeData = FinanceData.fromJson(data);
 
-            // Guardar en GlobalVars
-            GlobalVars().set(_financeDataKey, financeData);
+            // Cache local en Hive
+            LocalStorageService.instance.saveFinanceData(financeData);
 
             return {
               'success': true,
               'message': 'Datos financieros obtenidos correctamente',
             };
           } catch (e) {
-            print('Error al convertir datos financieros: $e');
             return {
               'success': false,
               'message':
@@ -134,11 +118,11 @@ class FinanceController {
         } else {
           return {
             'success': false,
-            'message': data['message'] ?? 'Error al obtener datos financieros',
+            'message':
+            data['message'] ?? 'Error al obtener datos financieros',
           };
         }
       } catch (e) {
-        print('Error al procesar la respuesta: $e');
         return {
           'success': false,
           'message': 'Error al procesar la respuesta: ${e.toString()}',
@@ -153,25 +137,18 @@ class FinanceController {
     }
   }
 
-  /// Obtiene los datos financieros
+  /// Obtiene los datos financieros cacheados desde Hive.
   ///
-  /// Retorna los datos financieros o null si no hay datos disponibles
+  /// 👉 Esto es lo que usa `FinanceView` en `_initializeFinanceData()`.
   FinanceData? getFinanceData() {
-    return GlobalVars().has(_financeDataKey)
-        ? GlobalVars().get(_financeDataKey) as FinanceData
-        : null;
+    return LocalStorageService.instance.getFinanceDataSync();
   }
 
-  /// Actualiza los datos financieros desde el servidor
-  ///
-  /// Retorna un Map con:
-  /// - 'success': true si la operación fue exitosa, false en caso contrario
-  /// - 'message': mensaje de éxito o error
+  /// Fuerza refresco de datos financieros desde la API usando el token actual.
   Future<Map<String, dynamic>> refreshFinanceData() async {
-    // Verificar si hay un token de autenticación disponible
-    final String? authToken = _getAuthToken();
+    final String? authToken = AuthController.instance.getAuthToken();
 
-    if (authToken == null) {
+    if (authToken == null || authToken.isEmpty) {
       return {
         'success': false,
         'message': 'No hay datos de autenticación disponibles',
@@ -179,44 +156,5 @@ class FinanceController {
     }
 
     return await fetchFinanceData(authToken);
-  }
-
-  /// Limpia los datos financieros almacenados
-  void clearFinanceData() {
-    if (GlobalVars().has(_financeDataKey)) {
-      GlobalVars().remove(_financeDataKey);
-    }
-  }
-
-  /// Obtiene el token de autenticación actual
-  ///
-  /// Retorna el token o null si no está disponible
-  String? _getAuthToken() {
-    // Verificar si hay datos de perfil disponibles
-    if (GlobalVars().has('profileData')) {
-      final profileData = GlobalVars().get('profileData');
-      if (profileData != null) {
-        return profileData.auth;
-      }
-    }
-
-    // Si no hay datos de perfil, buscar el token directamente
-    if (GlobalVars().has('authToken')) {
-      return GlobalVars().get('authToken') as String?;
-    }
-
-    return null;
-  }
-
-  /// Obtiene la cookie de sesión actual
-  ///
-  /// Retorna la cookie o null si no está disponible
-  String? _getSessionCookie() {
-    // Buscar la cookie de sesión en GlobalVars
-    if (GlobalVars().has(_sessionCookieKey)) {
-      return GlobalVars().get(_sessionCookieKey) as String?;
-    }
-
-    return null;
   }
 }

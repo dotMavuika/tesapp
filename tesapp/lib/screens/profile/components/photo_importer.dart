@@ -7,6 +7,9 @@ class PhotoImporter {
   // Instancia privada estática para Singleton
   static final PhotoImporter _instance = PhotoImporter._internal();
 
+  // Cache en memoria: url -> bytes
+  final Map<String, Uint8List> _memoryCache = {};
+
   // Constructor factory que devuelve la instancia
   factory PhotoImporter() {
     return _instance;
@@ -15,36 +18,53 @@ class PhotoImporter {
   // Constructor privado
   PhotoImporter._internal();
 
-  /// Obtiene una imagen con headers específicos
-  /// 
-  /// [imageUrl] URL de la imagen a cargar
-  /// [referer] URL de referer para la petición
-  Future<Uint8List?> fetchImageWithHeaders(String imageUrl, {String? referer}) async {
+  /// Limpia el caché en memoria (por si alguna vez lo necesitas)
+  void clearCache() {
+    _memoryCache.clear();
+  }
+
+  /// Obtiene una imagen con headers específicos.
+  ///
+  /// Usa caché en memoria para no repetir la descarga
+  /// mientras la app esté viva.
+  Future<Uint8List?> fetchImageWithHeaders(
+      String imageUrl, {
+        String? referer,
+        bool forceRefresh = false,
+      }) async {
     try {
+      // Si tenemos la imagen en caché y no se fuerza refresh, devolverla
+      if (!forceRefresh && _memoryCache.containsKey(imageUrl)) {
+        return _memoryCache[imageUrl];
+      }
+
       Map<String, String> headers = {};
-      
+
       // Añadir referer si se proporciona
       if (referer != null && referer.isNotEmpty) {
         headers['Referer'] = referer;
       }
-      
+
       final response = await http.get(
         Uri.parse(imageUrl),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200) {
-        return response.bodyBytes;
+        final bytes = response.bodyBytes;
+        // Guardar en caché
+        _memoryCache[imageUrl] = bytes;
+        return bytes;
       }
       return null;
     } catch (e) {
-      print('Error al cargar la imagen: $e');
+
       return null;
     }
   }
 
   /// Widget para mostrar imagen de perfil circular
-  /// 
+  ///
   /// [imageUrl] URL de la imagen a mostrar
   /// [referer] URL de referer para la petición
   /// [size] Tamaño del widget (ancho y alto)
@@ -54,6 +74,7 @@ class PhotoImporter {
   /// [backgroundColor] Color de fondo cuando no hay imagen
   /// [iconColor] Color del icono por defecto
   /// [iconSize] Tamaño del icono por defecto
+  /// [forceRefresh] Si es true, ignora el caché en memoria y vuelve a descargar
   Widget buildCircularProfileImage({
     required String imageUrl,
     String referer = 'https://tesa.academicok.com/',
@@ -64,6 +85,7 @@ class PhotoImporter {
     Color backgroundColor = Colors.grey,
     Color iconColor = Colors.white,
     double iconSize = 50,
+    bool forceRefresh = false,
   }) {
     if (imageUrl.isEmpty) {
       return Container(
@@ -82,9 +104,15 @@ class PhotoImporter {
     }
 
     return FutureBuilder<Uint8List?>(
-      future: fetchImageWithHeaders(imageUrl, referer: referer),
+      future: fetchImageWithHeaders(
+        imageUrl,
+        referer: referer,
+        forceRefresh: forceRefresh,
+      ),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !(_memoryCache.containsKey(imageUrl))) {
+          // Sólo mostramos el loader si NO tenemos ya la imagen en caché
           return Container(
             width: size,
             height: size,
@@ -107,6 +135,25 @@ class PhotoImporter {
             child: ClipOval(
               child: Image.memory(
                 snapshot.data!,
+                fit: BoxFit.cover,
+                width: size,
+                height: size,
+              ),
+            ),
+          );
+        } else if (_memoryCache.containsKey(imageUrl)) {
+          // Por si falla la future pero tenemos caché
+          final bytes = _memoryCache[imageUrl]!;
+          return Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: borderColor, width: borderWidth),
+            ),
+            child: ClipOval(
+              child: Image.memory(
+                bytes,
                 fit: BoxFit.cover,
                 width: size,
                 height: size,

@@ -30,29 +30,12 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          /* Positioned(
-            width: MediaQuery.of(context).size.width * 1.7,
-            left: 100,
-            bottom: 100,
-            child: Image.asset(
-              "assets/Backgrounds/Spline.png",
-            ),
+          // Fondo blanco sólido
+          Container(
+            color: Colors.white,
           ),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: const SizedBox(),
-            ),
-          ),
-          const RiveAnimation.asset(
-            "assets/RiveAssets/shapes.riv",
-          ),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-              child: const SizedBox(),
-            ),
-          ),*/
+
+          // Contenido principal
           AnimatedPositioned(
             top: isShowSignInDialog ? -50 : 0,
             height: MediaQuery.of(context).size.height,
@@ -61,13 +44,12 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
-                // 👇 aquí va tu contenido principal
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Spacer(),
 
-                    // Centro: logo
+                    // Logo
                     SizedBox(
                       width: 260,
                       child: Column(
@@ -75,7 +57,7 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
                         children: [
                           Image.asset(
                             'assets/icons/tesa_main_logo.png',
-                            height: 250, // puedes ajustar
+                            height: 250,
                             fit: BoxFit.contain,
                           ),
                         ],
@@ -83,11 +65,6 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
                     ),
 
                     const SizedBox(height: 16),
-
-                    const Text(
-                      "App de notificación y gestión académica de TESA.",
-                      textAlign: TextAlign.center,
-                    ),
 
                     const Spacer(flex: 2),
 
@@ -98,15 +75,30 @@ class _OnbodingScreenState extends State<OnbodingScreen> {
 
                         Future.delayed(
                           const Duration(milliseconds: 800),
-                              () {
+                              () async {
                             setState(() {
                               isShowSignInDialog = true;
                             });
                             if (!context.mounted) return;
-                            showCustomDialog(
+
+                            // ✅ Ahora sí podemos usar await
+                            final result = await showCustomDialog(
                               context,
                               onValue: (_) {},
                             );
+
+                            // Si el login fue exitoso (result == true), navegar al home
+                            if (result == true && context.mounted) {
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                '/home',
+                                    (route) => false,
+                              );
+                            } else {
+                              // Si no fue exitoso, resetear el estado
+                              setState(() {
+                                isShowSignInDialog = false;
+                              });
+                            }
                           },
                         );
                       },

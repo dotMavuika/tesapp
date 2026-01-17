@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../controllers/profile_controller.dart';
+// 👇 importa el PhotoImporter (ajusta la ruta si tu estructura es distinta)
+import '../../../screens/profile/components/photo_importer.dart';
 
 class SideBar extends StatefulWidget {
   final VoidCallback onProfileTap;
@@ -21,13 +23,9 @@ class SideBar extends StatefulWidget {
 
 class _SideBarState extends State<SideBar> {
   String selectedMenuItem = 'Inicio';
-  late ProfileController profileController;
 
-  @override
-  void initState() {
-    super.initState();
-    profileController = ProfileController();
-  }
+  // 🔧 En vez de late, lo inicializamos aquí directamente
+  final ProfileController profileController = ProfileController();
 
   String formatFullName(String? fullName) {
     if (fullName == null || fullName.trim().isEmpty) return 'Usuario';
@@ -67,13 +65,11 @@ class _SideBarState extends State<SideBar> {
         // "DE LA CRUZ JUAN"
         givenStart = firstSurnameLen;
       } else {
-        // asumimos: "PEREZ JUAN SEBASTIAN" → nombres: JUAN SEBASTIAN
+        // "PEREZ JUAN SEBASTIAN"
         givenStart = 1;
       }
     } else {
       // >= 4 tokens → típico: APELLIDO1 APELLIDO2 NOMBRE1 NOMBRE2
-      // Ej: "MORENO OCAMPO JUAN SEBASTIAN"
-      //     "DE LA CRUZ PEREZ JUAN SEBASTIAN"
       givenStart = firstSurnameLen + 1; // saltamos 2 apellidos
     }
 
@@ -81,7 +77,8 @@ class _SideBarState extends State<SideBar> {
       givenStart = parts.length - 1;
     }
 
-    final lastNameTokens = parts.sublist(0, firstSurnameLen); // solo primer apellido (compuesto)
+    final lastNameTokens =
+    parts.sublist(0, firstSurnameLen); // solo primer apellido (compuesto)
     final firstName = parts[givenStart];
 
     return '$firstName ${lastNameTokens.join(' ')}';
@@ -105,17 +102,14 @@ class _SideBarState extends State<SideBar> {
       final w = words[i];
 
       if (particles.contains(w)) {
-        // partículas en minúsculas
-        words[i] = w;
+        words[i] = w; // partículas en minúsculas
       } else {
-        // capitalizar
-        words[i] = w[0].toUpperCase() + w.substring(1);
+        words[i] = w[0].toUpperCase() + w.substring(1); // capitalizar
       }
     }
 
     return words.join(' ');
   }
-
 
   String getCarreraDisplay() {
     final activeProfile = profileController.getActiveProfile();
@@ -150,20 +144,22 @@ class _SideBarState extends State<SideBar> {
     callback();
   }
 
+  // 👇 Igual que en GeneralProfile, para manejar rutas relativas de la foto
+  String _buildAbsoluteUrl(String? path) {
+    if (path == null || path.isEmpty) return '';
+    if (path.startsWith('http')) return path;
+    return 'https://tesa.academicok.com${path.startsWith('/') ? '' : '/'}$path';
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileDataStudent = profileController.getProfileData();
-    final activeProfile = profileController.getActiveProfile();
 
     final rawName = profileDataStudent?.persona;
     final formattedName = toNiceCase(formatFullName(rawName));
     final carreraText = getCarreraDisplay();
+    final fotoUrl = _buildAbsoluteUrl(profileDataStudent?.foto);
 
-
-
-    // 🔍 Debug: ver qué viene del backend y qué estamos mostrando
-    print("NOMBRE CRUDO: '$rawName'");
-    print("NOMBRE FORMATEADO: '$formattedName'");
 
     return SafeArea(
       child: Container(
@@ -185,15 +181,16 @@ class _SideBarState extends State<SideBar> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    CircleAvatar(
+                    // 👇 Aquí usamos PhotoImporter en vez de CircleAvatar+NetworkImage
+                    PhotoImporter().buildCircularProfileImage(
+                      imageUrl: fotoUrl,
+                      referer: 'https://tesa.academicok.com/',
+                      size: 60, // equivalente a radius 30
+                      borderColor: Colors.white,
+                      borderWidth: 2,
                       backgroundColor: Colors.white24,
-                      radius: 30,
-                      backgroundImage: (profileDataStudent?.foto?.isNotEmpty ?? false)
-                          ? NetworkImage(profileDataStudent!.foto!)
-                          : null,
-                      child: (profileDataStudent?.foto?.isEmpty ?? true)
-                          ? const Icon(Icons.person, color: Colors.white, size: 30)
-                          : null,
+                      iconColor: Colors.white,
+                      iconSize: 30,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -209,7 +206,7 @@ class _SideBarState extends State<SideBar> {
                               child: Text(
                                 formattedName,
                                 style: const TextStyle(
-                                  fontSize: 18, // tamaño base, baja si no cabe
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
                                 ),
@@ -259,7 +256,6 @@ class _SideBarState extends State<SideBar> {
                 ),
               ),
 
-              // Elementos del menú
               _buildMenuItem(
                 icon: Icons.home_outlined,
                 title: 'Inicio',
@@ -273,28 +269,6 @@ class _SideBarState extends State<SideBar> {
                 isSelected: selectedMenuItem == 'Perfil',
                 onTap: () => _selectMenuItem('Perfil', widget.onProfileTap),
               ),
-
-              // Solo mostrar Horario si es estudiante
-              if (profileController.isActiveProfileStudent() == true)
-                _buildMenuItem(
-                  icon: Icons.calendar_today_outlined,
-                  title: 'Horario',
-                  isSelected: selectedMenuItem == 'Horario',
-                  onTap: () => _selectMenuItem('Horario', () {
-                    // TODO: Implementar navegación a Horario
-                  }),
-                ),
-
-              // Solo mostrar Calificaciones si es estudiante
-              if (profileController.isActiveProfileStudent() == true)
-                _buildMenuItem(
-                  icon: Icons.school_outlined,
-                  title: 'Calificaciones',
-                  isSelected: selectedMenuItem == 'Calificaciones',
-                  onTap: () => _selectMenuItem('Calificaciones', () {
-                    // TODO: Implementar navegación a Calificaciones
-                  }),
-                ),
 
               _buildMenuItem(
                 icon: Icons.payment_outlined,
@@ -315,24 +289,6 @@ class _SideBarState extends State<SideBar> {
                       .titleMedium!
                       .copyWith(color: Colors.white70),
                 ),
-              ),
-
-              _buildMenuItem(
-                icon: Icons.settings_outlined,
-                title: 'Ajustes',
-                isSelected: selectedMenuItem == 'Ajustes',
-                onTap: () => _selectMenuItem('Ajustes', () {
-                  // TODO: Implementar navegación a Ajustes
-                }),
-              ),
-
-              _buildMenuItem(
-                icon: Icons.help_outline,
-                title: 'Ayuda',
-                isSelected: selectedMenuItem == 'Ayuda',
-                onTap: () => _selectMenuItem('Ayuda', () {
-                  // TODO: Implementar navegación a Ayuda
-                }),
               ),
 
               _buildMenuItem(

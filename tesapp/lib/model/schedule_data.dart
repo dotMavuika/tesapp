@@ -83,14 +83,12 @@ class ScheduleData {
             try {
               allItems.add(ScheduleItem.fromJson(item));
             } catch (e) {
-              print('Error al procesar una clase: $e');
               // Continuar con la siguiente clase en lugar de fallar
             }
           }
         }
       }
     } catch (e) {
-      print('Error al procesar el horario: $e');
       // No lanzar excepción, devolver lista vacía
     }
 

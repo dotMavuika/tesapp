@@ -145,7 +145,6 @@ class GradesData {
             .toList();
       }
     } catch (e) {
-      print('Error al procesar las materias: $e');
     }
 
     return GradesData(

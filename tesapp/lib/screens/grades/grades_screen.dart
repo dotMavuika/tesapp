@@ -15,21 +15,41 @@ class _GradesScreenState extends State<GradesScreen>
     with SingleTickerProviderStateMixin {
   final GradesController _gradesController = GradesController();
   late TabController _tabController;
+
   bool _isLoading = true;
   String _errorMessage = '';
   GradesData? _gradesData;
+
+  static const Color _primaryPurple = Color(0xFF7C3E8E);
+  static const Color _secondaryPurple = Color(0xFF9A56A8);
+  static const Color _primaryYellow = Color(0xFFE6B420);
+  static const Color _background = Colors.white;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _loadGradesData();
+    _initializeGradesData();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// Primero intenta caché, si no hay, consulta API real
+  void _initializeGradesData() {
+    final cachedData = _gradesController.getGradesData();
+
+    if (cachedData != null && cachedData.materias.isNotEmpty) {
+      setState(() {
+        _gradesData = cachedData;
+        _isLoading = false;
+      });
+    } else {
+      _loadGradesData();
+    }
   }
 
   Future<void> _loadGradesData() async {
@@ -57,18 +77,14 @@ class _GradesScreenState extends State<GradesScreen>
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Materias y Calificaciones'),
-        ),
+        appBar: _buildAppBar(false),
         body: const LoadingIndicator(message: 'Cargando calificaciones...'),
       );
     }
 
     if (_errorMessage.isNotEmpty) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Materias y Calificaciones'),
-        ),
+        appBar: _buildAppBar(false),
         body: ErrorMessage(
           message: _errorMessage,
           onRetry: _loadGradesData,
@@ -78,110 +94,32 @@ class _GradesScreenState extends State<GradesScreen>
 
     if (_gradesData == null || _gradesData!.materias.isEmpty) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Materias y Calificaciones'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _loadGradesData,
-              tooltip: 'Actualizar calificaciones',
-            ),
-          ],
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.school_outlined,
-                size: 80,
-                color: Colors.grey,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'No hay materias disponibles',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'No se encontraron materias o calificaciones para mostrar',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: _loadGradesData,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Actualizar'),
-              ),
-            ],
-          ),
+        appBar: _buildAppBar(false),
+        body: const Center(
+          child: Text('No hay materias disponibles'),
         ),
       );
     }
 
-    // Calcular el promedio general para mostrarlo
     final promedio = _gradesData!.promedioGeneral;
     final materiasEnCurso = _gradesData!.materiasEnCurso;
     final materiasAprobadas = _gradesData!.materiasAprobadas;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Materias y Calificaciones'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadGradesData,
-            tooltip: 'Actualizar calificaciones',
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'En Curso'),
-            Tab(text: 'Aprobadas'),
-          ],
-        ),
-      ),
+      appBar: _buildAppBar(true),
+      backgroundColor: _background,
       body: Column(
         children: [
-          // Panel de resumen
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            color: Theme.of(context).primaryColor.withOpacity(0.1),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildSummaryItem(
-                  icon: Icons.school,
-                  title: 'Promedio General',
-                  value: promedio.toStringAsFixed(2),
-                ),
-                _buildSummaryItem(
-                  icon: Icons.book,
-                  title: 'Materias En Curso',
-                  value: materiasEnCurso.length.toString(),
-                ),
-                _buildSummaryItem(
-                  icon: Icons.check_circle,
-                  title: 'Materias Aprobadas',
-                  value: materiasAprobadas.length.toString(),
-                ),
-              ],
-            ),
+          _buildSummaryPanel(
+            promedio,
+            materiasEnCurso.length,
+            materiasAprobadas.length,
           ),
-
-          // TabBarView con las listas de materias
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
-                // Tab de materias en curso
                 _buildSubjectsList(materiasEnCurso),
-
-                // Tab de materias aprobadas
                 _buildSubjectsList(materiasAprobadas),
               ],
             ),
@@ -191,25 +129,75 @@ class _GradesScreenState extends State<GradesScreen>
     );
   }
 
-  Widget _buildSummaryItem({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
+  AppBar _buildAppBar(bool withTabs) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 1,
+      title: const Text(
+        'Materias y Calificaciones',
+        style: TextStyle(
+          color: _primaryPurple,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      foregroundColor: _primaryPurple,
+      bottom: withTabs
+          ? TabBar(
+        controller: _tabController,
+        labelColor: _primaryYellow,
+        unselectedLabelColor: _primaryPurple,
+        indicatorColor: _primaryYellow,
+        indicatorWeight: 4,
+        tabs: const [
+          Tab(text: 'En Curso'),
+          Tab(text: 'Aprobadas'),
+        ],
+      )
+          : null,
+    );
+  }
+
+  Widget _buildSummaryPanel(double promedio, int enCurso, int aprobadas) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [_primaryPurple, _secondaryPurple],
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildSummaryItem(
+            Icons.school,
+            "Promedio",
+            promedio.toStringAsFixed(2),
+          ),
+          _buildSummaryItem(Icons.book, "En Curso", enCurso.toString()),
+          _buildSummaryItem(Icons.check_circle, "Aprobadas", aprobadas.toString()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryItem(IconData icon, String title, String value) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: Theme.of(context).primaryColor),
+        Icon(icon, size: 28, color: _primaryYellow),
         const SizedBox(height: 4),
         Text(
           title,
-          style: const TextStyle(fontSize: 12),
+          style: const TextStyle(color: Colors.white70, fontSize: 12),
         ),
         Text(
           value,
           style: const TextStyle(
-            fontSize: 16,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
         ),
       ],
@@ -217,178 +205,81 @@ class _GradesScreenState extends State<GradesScreen>
   }
 
   Widget _buildSubjectsList(List<SubjectGrade> subjects) {
-    if (subjects.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.school_outlined,
-              size: 60,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No hay materias ${_tabController.index == 0 ? 'en curso' : 'aprobadas'}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: subjects.length,
+      itemBuilder: (context, index) {
+        final subject = subjects[index];
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [_primaryPurple, _secondaryPurple],
               ),
+              borderRadius: BorderRadius.circular(16),
             ),
-          ],
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadGradesData,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: subjects.length,
-        itemBuilder: (context, index) {
-          final subject = subjects[index];
-
-          // Determinar color basado en el estado
-          Color statusColor;
-          try {
-            final colorHex = subject.colorEstado.replaceFirst('#', '');
-            statusColor = Color(int.parse('FF$colorHex', radix: 16));
-          } catch (e) {
-            statusColor = subject.isAprobada ? Colors.green : Colors.blue;
-          }
-
-          return Card(
-            elevation: 3,
-            margin: const EdgeInsets.only(bottom: 16.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              side: BorderSide(
-                color: statusColor.withOpacity(0.5),
-                width: 1.0,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  subject.nombreCorto,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...subject.parciales.map(
+                      (p) => Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Text(
-                          subject.nombreCorto,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          subject.estado,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: statusColor,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Información del profesor
-                  Row(
-                    children: [
-                      const Icon(Icons.person, size: 16, color: Colors.grey),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          subject.profesores.isNotEmpty
-                              ? subject.profesores.first
-                              : 'Sin profesor',
-                          style: TextStyle(color: Colors.grey[700]),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Información de asistencia
-                  Row(
-                    children: [
-                      const Icon(Icons.calendar_today,
-                          size: 16, color: Colors.grey),
-                      const SizedBox(width: 8),
                       Text(
-                        'Asistencia: ${subject.asistencia.toStringAsFixed(1)}%',
-                        style: TextStyle(color: Colors.grey[700]),
+                        p.name,
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                      Text(
+                        p.grade.toStringAsFixed(1),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-
-                  // Notas parciales
-                  if (subject.parciales.isNotEmpty) ...[
+                ),
+                const Divider(color: Colors.white30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                     const Text(
-                      'Calificaciones',
+                      "Nota Final",
                       style: TextStyle(
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
                       ),
                     ),
-                    const SizedBox(height: 8),
-
-                    // Lista de notas parciales
-                    ...subject.parciales.map((parcial) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(parcial.name),
-                              Text(
-                                parcial.grade.toStringAsFixed(1),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        )),
-
-                    const Divider(),
-
-                    // Nota final
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Nota Final',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          subject.notaFinal.toStringAsFixed(1),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: subject.isAprobada ? Colors.green : null,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      subject.notaFinal.toStringAsFixed(1),
+                      style: const TextStyle(
+                        color: _primaryYellow,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
-                ],
-              ),
+                )
+              ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

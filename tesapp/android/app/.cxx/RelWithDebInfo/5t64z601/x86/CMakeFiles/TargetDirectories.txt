@@ -1,0 +1,2 @@
+C:/Users/janse/StudioProjects/tesapp/tesapp/android/app/.cxx/RelWithDebInfo/5t64z601/x86/CMakeFiles/edit_cache.dir
+C:/Users/janse/StudioProjects/tesapp/tesapp/android/app/.cxx/RelWithDebInfo/5t64z601/x86/CMakeFiles/rebuild_cache.dir

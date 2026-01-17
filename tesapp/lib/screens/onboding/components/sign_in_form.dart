@@ -1,16 +1,15 @@
+// lib/screens/onboding/components/sign_in_form.dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rive/rive.dart';
-// Corrige esta importación para que coincida con la ubicación exacta de tu archivo entry_point.dart
-import 'package:tesapp/screens/entryPoint/entry_point.dart';
-// Importar el controlador
+import 'package:flutter/widgets.dart' as flutter_widgets;
+import 'package:provider/provider.dart';
 import 'package:tesapp/controllers/login_controller.dart';
+import 'package:tesapp/controllers/auth_controller.dart';
 
 class SignInForm extends StatefulWidget {
-  const SignInForm({
-    super.key,
-  });
+  const SignInForm({super.key});
 
   @override
   State<SignInForm> createState() => _SignInFormState();
@@ -20,17 +19,21 @@ class _SignInFormState extends State<SignInForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isShowLoading = false;
   bool isShowConfetti = false;
+
   late SMITrigger error;
   late SMITrigger success;
   late SMITrigger reset;
   late SMITrigger confetti;
 
-  // Controladores para los campos de texto
+  // Controladores de texto
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // Instancia del controlador de login
+  // Controlador de login
   final LoginController _loginController = LoginController();
+
+  // Checkbox "Guardar sesión"
+  bool _rememberSession = false;
 
   @override
   void dispose() {
@@ -67,71 +70,81 @@ class _SignInFormState extends State<SignInForm> {
       return;
     }
 
-    // Mostrar la animación de carga
     setState(() {
       isShowLoading = true;
     });
 
-    // Obtener los valores de los campos
     final user = _userController.text;
     final password = _passwordController.text;
 
     try {
-      // Enviar datos al controlador para validación
-      final result = await _loginController.login(user, password);
+      // 1) Llamar a la API a través del LoginController
+      final result = await _loginController.login(
+        user,
+        password,
+        rememberSession: _rememberSession,
+      );
 
-      if (result['success']) {
-        // Éxito en la autenticación
+      if (result['success'] == true) {
+        // 2) Animación de éxito
         success.fire();
 
-        // Esperar a que termine la animación de éxito
-        await Future.delayed(const Duration(seconds: 2));
+        // 3) Esperar a que termine la animación de check (éxito)
+        await Future.delayed(const Duration(milliseconds: 1500));
 
-        // Primero ocultar la animación de carga
+        if (!mounted) return;
+
+        // 4) Refrescar perfil en segundo plano (no bloqueante)
+        try {
+          final authController = context.read<AuthController>();
+          authController.refreshProfile(); // Sin await para no bloquear
+        } catch (e) {
+          debugPrint('No se pudo refrescar el perfil tras login: $e');
+        }
+
+        // 5) Ocultar la animación de carga
         setState(() {
           isShowLoading = false;
         });
 
-        // Luego mostrar y disparar el confeti
+        // 6) Mostrar el confeti
         setState(() {
           isShowConfetti = true;
         });
 
-        // Dar tiempo para que el widget de confeti se inicialice
-        await Future.delayed(const Duration(milliseconds: 200));
+        // 7) Dar tiempo para que el widget de confeti se inicialice y dispare
+        await Future.delayed(const Duration(milliseconds: 300));
 
         if (mounted) {
           confetti.fire();
         }
 
-        // Esperar y navegar
-        await Future.delayed(const Duration(seconds: 1));
+        // 8) Esperar a que se vea bien el confeti antes de navegar
+        await Future.delayed(const Duration(milliseconds: 1500));
 
-        if (!context.mounted) return;
+        if (!mounted) return;
 
-        // Asegúrate de que esta navegación sea correcta
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const EntryPoint(),
-          ),
-        );
+        // 9) Cerrar el dialog y pasar un indicador de éxito
+        Navigator.of(context).pop(true); // Pasamos true para indicar login exitoso
+
+        // La navegación al home se hará desde OnbodingScreen
+        // al recibir el resultado del dialog
       } else {
-        // Error en la autenticación
+        // ❌ Error de autenticación
         error.fire();
 
         // Esperar a que termine la animación de error
         await Future.delayed(const Duration(seconds: 2));
 
-        // Ocultar la animación de carga y mostrar mensaje de error
+        if (!mounted) return;
+
+        // Ocultar la animación de carga
         setState(() {
           isShowLoading = false;
         });
 
         reset.fire();
 
-        // Mostrar mensaje de error
-        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message'] ?? 'Error de autenticación'),
@@ -140,10 +153,12 @@ class _SignInFormState extends State<SignInForm> {
         );
       }
     } catch (e) {
-      // Error en la conexión o procesamiento
+      // ❌ Error en conexión/proceso
       error.fire();
 
       await Future.delayed(const Duration(seconds: 2));
+
+      if (!mounted) return;
 
       setState(() {
         isShowLoading = false;
@@ -151,7 +166,6 @@ class _SignInFormState extends State<SignInForm> {
 
       reset.fire();
 
-      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
@@ -191,11 +205,18 @@ class _SignInFormState extends State<SignInForm> {
                   decoration: InputDecoration(
                     prefixIcon: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: SvgPicture.asset("assets/icons/email.svg"),
+                      child: SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: SvgPicture.asset(
+                          "assets/icons/icon_login.svg",
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
+                      ),
+                      ),
                   ),
-                ),
-              ),
               const Text(
                 "Contraseña",
                 style: TextStyle(
@@ -221,12 +242,32 @@ class _SignInFormState extends State<SignInForm> {
                   ),
                 ),
               ),
+              Row(
+                children: [
+                  Checkbox(
+                    value: _rememberSession,
+                    onChanged: (value) {
+                      setState(() {
+                        _rememberSession = value ?? false;
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 4),
+                  const Expanded(
+                    child: Text(
+                      "Guardar sesión en este dispositivo",
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               Padding(
                 padding: const EdgeInsets.only(top: 8, bottom: 24),
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    signIn(context);
-                  },
+                  onPressed: () => signIn(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF7C3E8E),
                     minimumSize: const Size(double.infinity, 56),
@@ -254,7 +295,7 @@ class _SignInFormState extends State<SignInForm> {
           child: RiveAnimation.asset(
             'assets/RiveAssets/check.riv',
             fit: BoxFit.cover,
-            onInit: _onCheckRiveInit,
+            onInit: _onCheckRiveInit, // ✅ Esta línea faltaba
           ),
         )
             : const SizedBox(),

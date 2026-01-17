@@ -1,0 +1,2 @@
+C:/Users/janse/StudioProjects/tesapp/tesapp/android/app/.cxx/RelWithDebInfo/5t64z601/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/janse/StudioProjects/tesapp/tesapp/android/app/.cxx/RelWithDebInfo/5t64z601/armeabi-v7a/CMakeFiles/rebuild_cache.dir

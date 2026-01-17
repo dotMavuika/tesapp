@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tesapp/controllers/dashboard_controller.dart';
 import 'package:tesapp/screens/home/components/course_card.dart';
-import 'package:tesapp/screens/schedule/schedule_screen.dart'; // Importar la pantalla de horarios
-import 'package:tesapp/screens/grades/grades_screen.dart'; // Importar la pantalla de calificaciones
+import 'package:tesapp/screens/schedule/schedule_screen.dart';
+import 'package:tesapp/screens/grades/grades_screen.dart';
+import 'package:tesapp/screens/record_academico/record_academico.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,16 +14,25 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  static const Color _primaryPurple = Color(0xFF7C3E8E);
+  static const Color _secondaryPurple = Color(0xFF9A56A8);
+  static const Color _primaryYellow = Color(0xFFE6B420);
+
   @override
   void initState() {
     super.initState();
-    // Cargar noticias cuando se inicia la página
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        Provider.of<DashboardController>(context, listen: false).fetchNews();
-      }
+      if (!mounted) return;
+
+      final dashboardController =
+      Provider.of<DashboardController>(context, listen: false);
+
+      dashboardController.fetchNews();       // carga inicial
+      dashboardController.startNewsClock();  // cada 5 horas
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +40,7 @@ class _HomePageState extends State<HomePage> {
     final controller = Provider.of<DashboardController>(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
@@ -55,23 +66,27 @@ class _HomePageState extends State<HomePage> {
                             .textTheme
                             .headlineMedium!
                             .copyWith(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
+                          color: _primaryPurple,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Row(
                         children: [
                           // Botón de actualizar
                           controller.isLoading
                               ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
-                                )
+                            width: 20,
+                            height: 20,
+                            child:
+                            CircularProgressIndicator(strokeWidth: 2),
+                          )
                               : IconButton(
-                                  icon: const Icon(Icons.refresh),
-                                  onPressed: () => controller.fetchNews(),
-                                ),
+                            icon: const Icon(
+                              Icons.refresh,
+                              color: _primaryPurple,
+                            ),
+                            onPressed: () => controller.fetchNews(),
+                          ),
                         ],
                       ),
                     ],
@@ -93,11 +108,19 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildNewsSection(DashboardController controller) {
     if (controller.isLoading && controller.news.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: CircularProgressIndicator(),
-        ),
+      return Column(
+        children: [
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: CircularProgressIndicator(
+                color: _primaryPurple,
+              ),
+            ),
+          ),
+          const SizedBox(height: 30),
+          _buildQuickAccessSection(context),
+        ],
       );
     }
 
@@ -112,12 +135,12 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontStyle: FontStyle.italic,
+                  color: _primaryPurple,
                 ),
               ),
             ),
           ),
           const SizedBox(height: 30),
-          // ✅ ACCESOS RÁPIDOS MOVIDOS AQUÍ - debajo del mensaje de no noticias
           _buildQuickAccessSection(context),
         ],
       );
@@ -132,8 +155,9 @@ class _HomePageState extends State<HomePage> {
           child: Text(
             "Últimas Noticias",
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+              fontWeight: FontWeight.bold,
+              color: _primaryPurple,
+            ),
           ),
         ),
         const SizedBox(height: 15),
@@ -154,7 +178,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         const SizedBox(height: 30),
-        // ✅ ACCESOS RÁPIDOS TAMBIÉN AQUÍ - cuando hay noticias
         _buildQuickAccessSection(context),
       ],
     );
@@ -169,19 +192,21 @@ class _HomePageState extends State<HomePage> {
           Text(
             "Accesos Rápidos",
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+              fontWeight: FontWeight.bold,
+              color: _primaryPurple,
+            ),
           ),
           const SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Wrap(
+            alignment: WrapAlignment.spaceEvenly,
+            spacing: 16,
+            runSpacing: 16,
             children: [
-              // ✅ SOLO HORARIO Y CALIFICACIONES - quitados Tareas y Calendario
               _buildAccessButton(
                 context,
                 icon: Icons.schedule,
                 label: "Horario",
-                color: Colors.blue,
+                color: _primaryYellow,
                 onTap: () {
                   Navigator.push(
                     context,
@@ -195,12 +220,27 @@ class _HomePageState extends State<HomePage> {
                 context,
                 icon: Icons.school,
                 label: "Calificaciones",
-                color: Colors.purple,
+                color: _primaryYellow,
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const GradesScreen(),
+                    ),
+                  );
+                },
+              ),
+              _buildAccessButton(
+                context,
+                icon: Icons.history_edu,
+                label: "Récord\nAcadémico",
+                color: _primaryYellow,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                      const RecordAcademicoScreen(),
                     ),
                   );
                 },
@@ -214,38 +254,50 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildAccessButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required String label,
+        required Color color,
+        required VoidCallback onTap,
+      }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: SizedBox(
-        width: 100, // ✅ Ancho aumentado para mejor distribución
+        width: 110,
         child: Column(
           children: [
             Container(
-              width: 60, // ✅ Tamaño aumentado
-              height: 60,
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: color,
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
               child: Icon(
                 icon,
                 color: color,
-                size: 30, // ✅ Ícono más grande
+                size: 30,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               label,
               style: const TextStyle(
-                fontSize: 14, // ✅ Texto ligeramente más grande
-                fontWeight: FontWeight.w500,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
               textAlign: TextAlign.center,
             ),

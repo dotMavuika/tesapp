@@ -3,8 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'sign_in_form.dart';
 
-void showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
-  showGeneralDialog(
+// ✅ Cambio: void → Future<bool?>
+Future<bool?> showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
+  return showGeneralDialog<bool>(  // ✅ Agregamos el tipo genérico
     context: context,
     barrierLabel: "Barrier",
     barrierDismissible: true,
@@ -24,9 +25,12 @@ void showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
             // Esto empuja el diálogo hacia arriba cuando aparece el teclado
             padding: EdgeInsets.only(bottom: viewInsets.bottom),
             child: Container(
-              height: 470,
+              height: 525,
               margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+              padding: const EdgeInsets.symmetric(
+                vertical: 32,
+                horizontal: 24,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.95),
                 borderRadius: BorderRadius.circular(40),
@@ -45,57 +49,60 @@ void showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
               ),
               child: Scaffold(
                 backgroundColor: Colors.transparent,
-                // Nosotros manejamos el movimiento con AnimatedPadding,
-                // así que desactivamos el resize interno del Scaffold
                 resizeToAvoidBottomInset: false,
-                body: const Stack(
+                body: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Text(
-                            "Iniciar sesión",
+                    const Column(
+                      children: [
+                        Text(
+                          "Iniciar sesión",
+                          style: TextStyle(
+                            fontSize: 34,
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Text(
+                            "Ingrese su usuario y contraseña",
                             style: TextStyle(
-                              fontSize: 34,
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w600,
+                              color: Colors.black54,
+                              fontSize: 16,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Text(
-                              "Ingrese su usuario y contraseña",
-                              style: TextStyle(
-                                color: Colors.black54,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
+                        ),
+                        // Formulario tal cual
+                        SignInForm(),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Divider(),
                             ),
-                          ),
-                          SignInForm(),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Divider(),
-                              ),
-                              Expanded(child: Divider()),
-                            ],
-                          ),
-                        ],
-                      ),
+                            Expanded(child: Divider()),
+                          ],
+                        ),
+                      ],
                     ),
                     Positioned(
                       left: 0,
                       right: 0,
                       bottom: -48,
-                      child: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.close,
-                          size: 20,
-                          color: Colors.black,
+                      child: GestureDetector(
+                        onTap: () {
+                          // Cierra el diálogo devolviendo false (login cancelado)
+                          Navigator.of(dialogContext).pop(false);
+                        },
+                        child: const CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.white,
+                          child: Icon(
+                            Icons.close,
+                            size: 20,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     )
@@ -108,7 +115,8 @@ void showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
       );
     },
     transitionBuilder: (_, anim, __, child) {
-      Tween<Offset> tween = Tween(begin: const Offset(0, -1), end: Offset.zero);
+      Tween<Offset> tween =
+      Tween(begin: const Offset(0, -1), end: Offset.zero);
 
       return SlideTransition(
         position: tween.animate(
@@ -117,5 +125,8 @@ void showCustomDialog(BuildContext context, {required ValueChanged onValue}) {
         child: child,
       );
     },
-  ).then(onValue);
+  ).then((value) {
+    onValue(value);  // ✅ Llamamos el callback con el valor
+    return value;     // ✅ Devolvemos el valor para el await
+  });
 }

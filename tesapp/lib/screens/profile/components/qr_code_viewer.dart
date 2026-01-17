@@ -24,7 +24,7 @@ class QRCodeViewer extends StatelessWidget {
       imageUrl = 'https://tesa.academicok.com${imageUrl.startsWith('/') ? '' : '/'}$imageUrl';
     }
 
-    print('Mostrando QR: $imageUrl');
+
 
     showDialog(
       context: context,
@@ -71,7 +71,7 @@ class QRCodeViewer extends StatelessWidget {
                           );
                         },
                         errorBuilder: (context, error, stackTrace) {
-                          print('Error al cargar QR: $error');
+
                           return const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

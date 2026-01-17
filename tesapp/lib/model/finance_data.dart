@@ -1,3 +1,4 @@
+// lib/model/finance_data.dart
 class FinanceData {
   final String result;
   final List<Rubro> rubros;
@@ -45,7 +46,7 @@ class FinanceData {
     };
   }
 
-  // Métodos útiles para análisis
+  // ---- Helpers de negocio ----
   List<Rubro> get rubrosPendientes =>
       rubros.where((r) => !r.cancelado).toList();
 
@@ -88,7 +89,7 @@ class Rubro {
       valor: _parseDouble(json['valor']),
       valorPendiente: _parseDouble(json['valor_pendiente']),
       fechaVence: json['fecha_vence'] ?? '',
-      cancelado: json['cancelado'] ?? false,
+      cancelado: _parseBool(json['cancelado']),
       deuda: _parseDouble(json['deuda']),
     );
   }
@@ -99,6 +100,16 @@ class Rubro {
     if (value is int) return value.toDouble();
     if (value is String) return double.tryParse(value) ?? 0.0;
     return 0.0;
+  }
+
+  static bool _parseBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is int) return value != 0;
+    if (value is String) {
+      final v = value.toLowerCase();
+      return v == '1' || v == 'true' || v == 't' || v == 'yes' || v == 'y';
+    }
+    return false;
   }
 
   Map<String, dynamic> toJson() {
@@ -118,18 +129,17 @@ class Rubro {
   bool get isPending => !cancelado && deuda > 0;
   String get statusText => cancelado ? 'Pagado' : 'Pendiente';
 
-  // Parsear la fecha para comparaciones
   DateTime? get parsedDate {
     try {
       final parts = fechaVence.split('-');
       if (parts.length == 3) {
         return DateTime(
-          int.parse(parts[2]), // año
-          int.parse(parts[1]), // mes
-          int.parse(parts[0]), // día
+          int.parse(parts[2]),
+          int.parse(parts[1]),
+          int.parse(parts[0]),
         );
       }
-    } catch (e) {
+    } catch (_) {
       return null;
     }
     return null;

@@ -1,7 +1,13 @@
+// lib/controllers/logout_controller.dart
 import 'dart:async';
+
 import '../model/global_vars.dart';
 import '../model/profile_data.dart';
 import 'package:http/http.dart' as http;
+
+import '/services/session_manager.dart';
+import '/services/local_storage_service.dart';
+import '/services/credential_storage.dart';
 
 class LogoutController {
   /// Realiza el logout del usuario
@@ -12,36 +18,26 @@ class LogoutController {
   /// - 'message': mensaje de éxito o error
   Future<Map<String, dynamic>> logout() async {
     try {
-      // Obtener el token de autenticación de las variables globales
-      final profileData = GlobalVars().get('profileData') as ProfileDataStudent?;
+      final profileData =
+      GlobalVars().get('profileData') as ProfileDataStudent?;
 
-      if (profileData == null) {
-        // Si no hay datos de perfil, consideramos que ya está deslogueado
-        _clearSessionData();
-        return {
-          'success': true,
-          'message': 'Sesión cerrada',
-        };
-      }
+      final authToken = profileData?.auth;
 
-      // Obtener el token de autenticación
-      final authToken = profileData.auth;
-
-      // Crear un cliente HTTP
       final client = http.Client();
 
       try {
-        // Enviar solicitud a la API de logout
-        await client.post(
-          Uri.parse('https://tesa.academicok.com/apimobile/logout'),
-          body: {
-            'token': authToken,
-          },
-        );
+        if (authToken != null && authToken.isNotEmpty) {
+          // Enviar solicitud a la API de logout (best effort)
+          await client.post(
+            Uri.parse('https://tesa.academicok.com/apimobile/logout'),
+            body: {
+              'token': authToken,
+            },
+          );
+        }
 
-        // No es necesario esperar a una respuesta específica
-        // Limpiamos los datos de sesión independientemente
-        _clearSessionData();
+        // Siempre limpiamos sesión local, aunque la API falle
+        await _clearSessionData();
 
         return {
           'success': true,
@@ -51,10 +47,9 @@ class LogoutController {
         client.close();
       }
     } catch (e) {
-      print('Error durante el cierre de sesión: $e');
 
       // Aún si hay error, intentamos limpiar los datos localmente
-      _clearSessionData();
+      await _clearSessionData();
 
       return {
         'success': false,
@@ -63,15 +58,24 @@ class LogoutController {
     }
   }
 
-  /// Limpia todos los datos de sesión almacenados
-  void _clearSessionData() {
-    // Eliminar los datos de perfil
-    GlobalVars().remove('profileData');
+  /// Limpia todos los datos de sesión almacenados (memoria + archivo + Hive)
+  Future<void> _clearSessionData() async {
+    // 1) Limpiar en memoria (GlobalVars)
+    GlobalVars().clear();
 
-    // Eliminar la cookie de sesión si existe
-    GlobalVars().remove('sessionCookie');
+    // 2) Limpiar SessionManager (archivo + memoria + rememberMe)
+    final sessionManager = SessionManager();
+    sessionManager.rememberMe = false;
+    await sessionManager.clearSession();
 
-    // Puedes agregar aquí la limpieza de cualquier otro dato relacionado con la sesión
-    print('Datos de sesión eliminados');
+    // 3) Limpiar credenciales recordadas ("guardar sesión")
+    await CredentialsStorage.clear();
+
+    // 4) Limpiar datos persistidos en Hive (perfil, flags, etc.)
+    final storage = LocalStorageService.instance;
+    await storage.clearSessionData();
+    // Si quieres explicitar el flag:
+    await storage.setIsLoggedIn(false);
+
   }
 }

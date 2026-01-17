@@ -1,21 +1,36 @@
+// lib/controllers/login_controller.dart
 import 'dart:async';
-import '../model/global_vars.dart';
-import '../model/profile_data.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:http/http.dart' as http;
+
+import '../model/global_vars.dart';
+import '../model/profile_data.dart';
+import '/services/session_manager.dart';
+import '/services/credential_storage.dart';
+import 'auth_controller.dart';
+
+// 👉 nuevos imports de controladores que vamos a prefetchear
+import 'user_panel_controller.dart';
+import 'schedule_controller.dart';
+import 'grades_controller.dart';
+import 'finance_controller.dart';
+import 'record_academico_controller.dart';
+
 class LoginController {
-  // Clave para almacenar la cookie de sesión
   static const String _sessionCookieKey = 'sessionCookie';
 
   /// Realiza la validación del login
   ///
-  /// Recibe [user] y [password] y devuelve un Map con:
-  /// - 'success': true si la autenticación fue exitosa, false en caso contrario
-  /// - 'message': mensaje de éxito o error
-  Future<Map<String, dynamic>> login(String user, String password) async {
+  /// [rememberSession] controla si:
+  ///  - se guardan credenciales en Hive (CredentialsStorage)
+  ///  - se marca la sesión como "recordada" para futuros arranques
+  Future<Map<String, dynamic>> login(
+      String user,
+      String password, {
+        bool rememberSession = false,
+      }) async {
     try {
-      // Crear un cliente HTTP para manejar cookies
       final client = http.Client();
 
       try {
@@ -28,52 +43,94 @@ class LoginController {
           },
         );
 
-        print('Respuesta recibida. Status code: ${response.statusCode}');
 
-        // Extraer la cookie de sesión de los headers
-        String? sessionCookie = _extractSessionCookie(response);
+        // Intentar extraer la cookie de sesión SIEMPRE
+        final String? sessionCookie = _extractSessionCookie(response);
 
-        if (response.statusCode == 200) {
-          // Si el servidor devuelve una respuesta OK, parseamos el JSON
-          final data = json.decode(response.body);
-          print('Respuesta recibida. Data: $data');
+        if (response.statusCode != 200) {
+          // HTTP error → limpiar sesión
+          await SessionManager().clearSession();
 
-          if (data['result'] == "ok") {
-            // Guardar los datos del usuario en variables globales
-            final profileData = ProfileDataStudent.fromJson(data);
-            GlobalVars().set('profileData', profileData);
-
-            // Guardar la cookie de sesión si existe
-            if (sessionCookie != null) {
-              print('Cookie de sesión guardada: $sessionCookie');
-              GlobalVars().set(_sessionCookieKey, sessionCookie);
-            } else {
-              print(
-                  'Advertencia: No se encontró cookie de sesión en la respuesta');
-            }
-
-            return {
-              'success': true,
-              'message': 'Inicio de sesión exitoso',
-            };
-          } else {
-            return {
-              'success': false,
-              'message': 'Usuario o contraseña incorrectos',
-            };
-          }
-        } else {
-          // Si el servidor devuelve un error, retornamos un mensaje genérico
           return {
             'success': false,
             'message': 'Error de autenticación (${response.statusCode})',
           };
         }
+
+        final data = json.decode(response.body);
+
+        if (data['result'] != 'ok') {
+          // Login rechazado → limpiar sesión + credenciales
+          await SessionManager().clearSession();
+          await CredentialsStorage.clear();
+             return {
+            'success': false,
+            'message': data['message'] ?? 'Usuario o contraseña incorrectos',
+          };
+        }
+
+        // --------------------------
+        //  ✅ Login exitoso
+        // --------------------------
+
+        // 1) Construimos ProfileDataStudent desde el JSON de /login
+        final profileData = ProfileDataStudent.fromJson(data);
+
+        // 2) Guardamos en GlobalVars (compatibilidad con el resto de la app)
+        GlobalVars().set('profileData', profileData);
+        GlobalVars().set('activeProfile', profileData.perfilActivo);
+
+        if (profileData.auth != null && profileData.auth!.isNotEmpty) {
+          GlobalVars().set('authToken', profileData.auth);
+        }
+
+        // 3) Guardar cookie de sesión en GlobalVars si existe
+        if (sessionCookie != null && sessionCookie.isNotEmpty) {
+          GlobalVars().set(_sessionCookieKey, sessionCookie);
+          GlobalVars().set('sessionCookie', sessionCookie);
+        } else {
+        }
+
+        // 4) Guardar credenciales sólo si el usuario marcó "Guardar sesión"
+        if (rememberSession) {
+          await CredentialsStorage.save(user, password);
+        } else {
+          await CredentialsStorage.clear();
+        }
+
+        final token = profileData.auth ?? '';
+
+        // 5) Actualizar SessionManager (memoria + archivo sólo si rememberSession=true)
+        await SessionManager().saveSession(
+          token: token,
+          remember: rememberSession,
+          sessionCookie: sessionCookie,
+        );
+
+        // 6) Sincronizar AuthController (memoria + Hive + flag isLoggedIn)
+        await AuthController.instance.persistCurrentSession(
+          rememberSession: rememberSession,
+        );
+
+        // 7) Prefetch de datos importantes para que el menú y las vistas
+        //    ya tengan info sin depender de entrar a "Récord académico".
+        if (token.isNotEmpty) {
+          _prefetchAfterLogin(token);
+        }
+
+        return {
+          'success': true,
+          'message': 'Inicio de sesión exitoso',
+          'token': token,
+        };
       } finally {
         client.close();
       }
     } catch (e) {
-      print('Error durante la autenticación: $e');
+
+      await SessionManager().clearSession();
+      await CredentialsStorage.clear();
+
       return {
         'success': false,
         'message': 'Error de conexión: ${e.toString()}',
@@ -81,24 +138,36 @@ class LoginController {
     }
   }
 
-  /// Extrae la cookie de sesión de los headers de respuesta
-  ///
-  /// Retorna la cookie de sesión o null si no se encuentra
-  String? _extractSessionCookie(http.Response response) {
-    // Obtener todos los headers de Set-Cookie
-    final cookies = response.headers['set-cookie'];
+  /// Prefetch en segundo plano de los módulos clave:
+  /// - user_panel (dashboard/principal)
+  /// - horario
+  /// - materias/notas
+  /// - finanzas
+  /// - récord académico
+  void _prefetchAfterLogin(String token) async {
+    try {
 
-    if (cookies == null) {
-      return null;
+      await Future.wait([
+        UserPanelController().fetchUserPanelData(token),
+        ScheduleController().fetchScheduleData(token),
+        GradesController().fetchGradesData(token),
+        FinanceController().fetchFinanceData(token),
+        RecordAcademicoController().fetchRecordAcademico(token),
+      ]);
+
+    } catch (e) {
     }
+  }
 
-    // Dividir múltiples cookies si existen
+  /// Extrae la cookie de sesión de los headers de respuesta
+  String? _extractSessionCookie(http.Response response) {
+    final cookies = response.headers['set-cookie'];
+    if (cookies == null) return null;
+
     final cookiesList = cookies.split(',');
 
-    // Buscar la cookie 'sessionid'
     for (var cookie in cookiesList) {
       if (cookie.trim().startsWith('sessionid=')) {
-        // Extraer el valor de la cookie
         final parts = cookie.split(';')[0].trim().split('=');
         if (parts.length == 2) {
           return parts[1];
