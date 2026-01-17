@@ -429,16 +429,18 @@ class _RecordAcademicoScreenState extends State<RecordAcademicoScreen> {
 
     Color pillColor;
     String pillText;
-    if (!valida) {
-      pillColor = Colors.redAccent;
-      pillText = 'Inválida';
-    } else if (aprobada) {
+
+    if (aprobada) {
       pillColor = Colors.greenAccent.shade400;
       pillText = 'Aprobada';
+    } else if (!valida) {
+      pillColor = Colors.redAccent;
+      pillText = 'No válida';
     } else {
       pillColor = Colors.orangeAccent;
       pillText = 'Reprobada';
     }
+
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
